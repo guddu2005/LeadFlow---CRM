@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+
+  /* Executive Monochromatic Palette (Strictly Black, Gray & White for BOTH Modes) */
+  --color-slate-950: #09090B;
+  --color-slate-900: #141414;
+  --color-slate-800: #18181B;
+  --color-slate-700: #27272A;
+  --color-slate-600: #52525B;
+
+  --color-blue-600: #09090B;
+  --color-blue-500: #18181B;
+  --color-blue-700: #000000;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+* {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* ===================================================
+   LIGHT MODE: Pure Off-White Canvas + Jet Black Accents
+   =================================================== */
+html, body {
+  scroll-behavior: smooth;
+  font-family: 'Poppins', sans-serif !important;
+  background-color: #FAFAFA !important;
+  color: #09090B !important;
+}
+
+/* Light Mode Buttons & Active Badges: Jet Black with White Text */
+.bg-blue-600,
+.bg-blue-500,
+.bg-blue-700 {
+  background-color: #09090B !important;
+  color: #FFFFFF !important;
+}
+
+.hover\:bg-blue-700:hover,
+.hover\:bg-blue-600:hover {
+  background-color: #27272A !important;
+}
+
+.text-blue-600,
+.text-blue-500 {
+  color: #09090B !important;
+}
+
+.border-blue-600,
+.border-blue-500 {
+  border-color: #09090B !important;
+}
+
+/* ===================================================
+   DARK MODE: Pure Obsidian Black + White Accents
+   =================================================== */
+.dark html, .dark body, .dark #root {
+  background-color: #09090B !important;
+  color: #FAFAFA !important;
+}
+
+/* Overriding all dark containers to Charcoal Gray & Black (Zero Dark Blue) */
+.dark .bg-slate-950,
+.dark .bg-slate-900,
+.dark .bg-slate-900\/80,
+.dark .bg-blue-950,
+.dark .bg-blue-900,
+.dark .bg-indigo-950,
+.dark .bg-indigo-900 {
+  background-color: #141414 !important;
+}
+
+.dark .bg-slate-800,
+.dark .hover\:bg-slate-800:hover,
+.dark .bg-blue-950\/20 {
+  background-color: #18181B !important;
+}
+
+.dark .border-slate-800,
+.dark .border-slate-700,
+.dark .border-slate-800\/80,
+.dark .border-blue-950,
+.dark .border-indigo-950 {
+  border-color: #27272A !important;
+}
+
+/* Dark Mode Buttons & Active Badges: Pure White with Jet Black Text */
+.dark .bg-blue-600,
+.dark .bg-blue-500,
+.dark .bg-blue-700 {
+  background-color: #FFFFFF !important;
+  color: #09090B !important;
+  font-weight: 700 !important;
+}
+
+.dark .hover\:bg-blue-700:hover,
+.dark .hover\:bg-blue-600:hover {
+  background-color: #E4E4E7 !important;
+}
+
+.dark .text-blue-600,
+.dark .text-blue-500,
+.dark .text-blue-400 {
+  color: #FFFFFF !important;
+}
+
+.dark .border-blue-600,
+.dark .border-blue-500 {
+  border-color: #FFFFFF !important;
+}
+
+/* High Contrast Monochromatic Text in Dark Mode */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #FAFAFA !important;
+}
+
+.dark p, .dark span, .dark td, .dark th, .dark label, .dark div {
+  color: #FAFAFA;
+}
+
+.dark .text-slate-400,
+.dark .text-slate-500,
+.dark .text-slate-600 {
+  color: #A1A1AA !important;
+}
+
+/* Executive Monochromatic Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #E4E4E7;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.03);
+}
+
+.dark .glass-card {
+  background: rgba(20, 20, 20, 0.95) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #27272A !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Monochromatic Gradient Text */
+.brand-gradient-text {
+  background: linear-gradient(135deg, #09090B 0%, #52525B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .brand-gradient-text {
+  background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

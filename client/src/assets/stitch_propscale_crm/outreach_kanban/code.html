@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Outreach Kanban Board - PropResearch</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#39393b",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "secondary": "#adc6ff",
+                        "on-surface": "#e5e1e4",
+                        "surface-container-high": "#2a2a2c",
+                        "on-secondary-container": "#e6ecff",
+                        "on-tertiary": "#003915",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-container-low": "#1c1b1d",
+                        "primary-container": "#8083ff",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface": "#131315",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#494bd6",
+                        "surface-container": "#201f22",
+                        "tertiary-container": "#00a74b",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed-variant": "#004395",
+                        "secondary-container": "#0566d9",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-variant": "#353437",
+                        "on-error": "#690005",
+                        "tertiary": "#4ae176",
+                        "on-tertiary-fixed": "#002109",
+                        "primary": "#c0c1ff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e5e1e4",
+                        "inverse-on-surface": "#313032",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-container": "#003111",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-container-highest": "#353437",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "outline": "#908fa0",
+                        "background": "#131315",
+                        "surface-container-lowest": "#0e0e10",
+                        "on-secondary": "#002e6a",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed": "#d8e2ff",
+                        "surface-dim": "#131315",
+                        "surface-tint": "#c0c1ff",
+                        "on-background": "#e5e1e4",
+                        "on-primary-container": "#0d0096"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "0.5rem",
+                        "base": "4px",
+                        "lg": "1.5rem",
+                        "margin-mobile": "1rem",
+                        "margin-desktop": "2.5rem",
+                        "md": "1rem",
+                        "xl": "2rem",
+                        "gutter": "1.5rem",
+                        "xs": "0.25rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for Kanban board */
+        .kanban-scroll::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .kanban-scroll::-webkit-scrollbar-track {
+            background: #1c1b1d; /* surface-container-low */
+            border-radius: 4px;
+        }
+        .kanban-scroll::-webkit-scrollbar-thumb {
+            background: #464554; /* outline-variant */
+            border-radius: 4px;
+        }
+        .kanban-scroll::-webkit-scrollbar-thumb:hover {
+            background: #908fa0; /* outline */
+        }
+        
+        /* Glassmorphism utility for modals/overlays if needed */
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Subtle glow for active/hover states */
+        .glow-hover:hover {
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen overflow-hidden flex">
+<!-- Side Navigation Shell -->
+<nav class="hidden md:flex flex-col h-full py-md w-60 h-screen fixed left-0 top-0 bg-surface border-r border-outline-variant/20 z-50">
+<div class="px-lg mb-xl">
+<h1 class="font-display-lg text-headline-lg font-bold text-primary">PropResearch AI</h1>
+<p class="font-body-md text-on-surface-variant mt-sm">Enterprise Lead Gen</p>
+</div>
+<div class="px-lg mb-xl">
+<button class="w-full bg-primary-container text-on-primary-container hover:bg-primary-fixed transition-colors duration-200 py-md px-md rounded font-body-md font-semibold flex items-center justify-center gap-sm active:scale-95 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add</span>
+                New Search
+            </button>
+</div>
+<ul class="flex flex-col gap-sm px-md flex-grow">
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">business</span>
+<span class="font-body-md">Companies</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">contacts</span>
+<span class="font-body-md">Contacts</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-r-2 border-primary bg-surface-variant/50 hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">view_kanban</span>
+<span class="font-body-md">Outreach</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">calendar_month</span>
+<span class="font-body-md">Interviews</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">monitoring</span>
+<span class="font-body-md">Analytics</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">verified_user</span>
+<span class="font-body-md">Compliance</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">description</span>
+<span class="font-body-md">Reports</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto px-md">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-0 md:ml-60 flex flex-col h-screen relative">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-lg w-full z-40 fixed top-0 right-0 md:left-60 left-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Button -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors active:opacity-80">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-display-lg text-headline-md font-bold text-on-surface hidden md:block">PropResearch</div>
+</div>
+<div class="flex items-center gap-lg">
+<!-- Search -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="bg-surface-container-high border border-outline-variant/30 rounded-full py-xs pl-xl pr-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all w-64 placeholder:text-on-surface-variant/50" placeholder="Search outreach..." type="text"/>
+</div>
+<div class="flex items-center gap-md border-l border-outline-variant/20 pl-md">
+<button class="text-on-surface-variant hover:text-primary transition-colors active:opacity-80 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary-container rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors active:opacity-80">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<button class="hidden lg:flex bg-transparent border border-outline-variant hover:border-primary hover:text-primary text-on-surface py-xs px-md rounded font-body-md transition-all active:scale-95 items-center gap-xs ml-sm">
+                        Create New Lead
+                    </button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30 overflow-hidden ml-sm cursor-pointer hover:border-primary transition-colors">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate user, dimly lit with a subtle indigo rim light, minimalist background, high quality portrait photography fitting a dark-mode enterprise application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB46FQobeAhrg1UAzHseBMvC9BjtMv9NIHLgeB0Myd9WktmxiAaFxZ0CKhxj61iT5fSi39kDRRTk4LasCJLBhRMYRAOHBfmMMZZZbLqlI7T-mHRwNXz0kWMaY4HJ6rV_2byZwKdVNRo6Yk_4FY3yBuszcuXHnpvNIh_zEn0BTwQngwRmHyPT28IpGMYOQXZTfGks_660H9dkNhi_x9gqfpShfKRU1XQ61r3KDKwqpRefOXU8VcuNQQZ-Q"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Kanban Board Container -->
+<div class="flex-1 mt-16 overflow-hidden flex flex-col p-lg bg-[#09090B]">
+<!-- Board Header / Filters -->
+<div class="flex items-center justify-between mb-lg shrink-0">
+<div>
+<h2 class="font-display-lg text-headline-md text-on-surface">Outreach Pipeline</h2>
+<p class="font-body-md text-on-surface-variant mt-xs">Manage active developer communications</p>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-md py-sm bg-surface-container border border-outline-variant/20 rounded-lg text-body-md hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filter
+                    </button>
+<button class="flex items-center gap-xs px-md py-sm bg-surface-container border border-outline-variant/20 rounded-lg text-body-md hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+                        Sort
+                    </button>
+</div>
+</div>
+<!-- Kanban Columns (Horizontal Scroll) -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden kanban-scroll flex gap-md pb-md">
+<!-- Column 1: Not Contacted -->
+<div class="flex-shrink-0 w-80 flex flex-col h-full bg-surface-container/30 rounded-xl border border-outline-variant/10">
+<div class="p-md flex items-center justify-between border-b border-outline-variant/10 shrink-0">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold">Not Contacted</h3>
+<span class="font-label-mono text-on-surface-variant bg-surface-container-high px-xs py-[2px] rounded text-[10px]">3</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-sm kanban-scroll">
+<!-- Card 1 -->
+<div class="bg-[#18181B] border border-white/5 rounded-lg p-md shadow-sm glow-hover transition-all cursor-grab group relative">
+<div class="absolute top-md right-md opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">drag_indicator</span>
+</div>
+<div class="mb-sm">
+<h4 class="font-headline-md text-[14px] text-on-surface font-semibold pr-lg">Apex Developments Ltd.</h4>
+<p class="font-body-md text-[12px] text-on-surface-variant">Sarah Jenkins, CDO</p>
+</div>
+<!-- AI Badge -->
+<div class="inline-flex items-center gap-xs bg-primary-container/10 border border-primary-container/20 rounded-full px-sm py-[2px] mb-sm">
+<span class="material-symbols-outlined text-primary-container text-[12px]">auto_awesome</span>
+<span class="font-label-mono text-primary-container text-[10px]">High Intent Match</span>
+</div>
+<div class="flex items-center justify-between mt-sm pt-sm border-t border-white/5">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span class="font-label-mono text-[10px]">Added 2d ago</span>
+</div>
+<span class="font-label-mono text-[10px] bg-surface-container-high px-xs py-[2px] rounded text-on-surface-variant">New</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: LinkedIn Sent -->
+<div class="flex-shrink-0 w-80 flex flex-col h-full bg-surface-container/30 rounded-xl border border-outline-variant/10">
+<div class="p-md flex items-center justify-between border-b border-outline-variant/10 shrink-0">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-[#0a66c2]"></span>
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold">LinkedIn Sent</h3>
+<span class="font-label-mono text-on-surface-variant bg-surface-container-high px-xs py-[2px] rounded text-[10px]">1</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">more_horiz</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-sm kanban-scroll">
+<!-- Card 2 -->
+<div class="bg-[#18181B] border border-white/5 rounded-lg p-md shadow-sm glow-hover transition-all cursor-grab group relative">
+<div class="absolute top-md right-md opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">drag_indicator</span>
+</div>
+<div class="mb-sm">
+<h4 class="font-headline-md text-[14px] text-on-surface font-semibold pr-lg">Nova Urban Group</h4>
+<p class="font-body-md text-[12px] text-on-surface-variant">Marcus Thorne, Dir. Acq.</p>
+</div>
+<div class="flex items-center justify-between mt-sm pt-sm border-t border-white/5">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">history</span>
+<span class="font-label-mono text-[10px]">Sent 4h ago</span>
+</div>
+<span class="font-label-mono text-[10px] bg-[#0a66c2]/20 text-[#adc6ff] border border-[#0a66c2]/30 px-xs py-[2px] rounded">Awaiting Accept</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: Connected -->
+<div class="flex-shrink-0 w-80 flex flex-col h-full bg-surface-container/30 rounded-xl border border-outline-variant/10">
+<div class="p-md flex items-center justify-between border-b border-outline-variant/10 shrink-0">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold">Connected</h3>
+<span class="font-label-mono text-on-surface-variant bg-surface-container-high px-xs py-[2px] rounded text-[10px]">0</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">more_horiz</span></button>
+</div>
+<div class="flex-1 overflow-y-auto p-md space-y-sm kanban-scroll border-2 border-dashed border-outline-variant/20 rounded-b-xl bg-surface-container-lowest/50 flex items-center justify-center m-sm">
+<p class="text-on-surface-variant/50 font-label-mono text-[12px]">Drop cards here</p>
+</div>
+</div>
+<!-- Add empty state columns to demonstrate structure -->
+<div class="flex-shrink-0 w-80 flex flex-col h-full bg-surface-container/30 rounded-xl border border-outline-variant/10 opacity-60">
+<div class="p-md flex items-center justify-between border-b border-outline-variant/10 shrink-0">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold">Email Sent</h3>
+<span class="font-label-mono text-on-surface-variant bg-surface-container-high px-xs py-[2px] rounded text-[10px]">0</span>
+</div>
+</div>
+</div>
+<div class="flex-shrink-0 w-80 flex flex-col h-full bg-surface-container/30 rounded-xl border border-outline-variant/10 opacity-60">
+<div class="p-md flex items-center justify-between border-b border-outline-variant/10 shrink-0">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold">Interview Booked</h3>
+<span class="font-label-mono text-on-surface-variant bg-surface-container-high px-xs py-[2px] rounded text-[10px]">0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports - PropResearch AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "tertiary-container": "#00a74b",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-highest": "#353437",
+                        "on-primary-container": "#0d0096",
+                        "on-secondary": "#002e6a",
+                        "tertiary": "#4ae176",
+                        "surface-tint": "#c0c1ff",
+                        "surface-container-lowest": "#0e0e10",
+                        "surface": "#131315",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "inverse-surface": "#e5e1e4",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-secondary-container": "#e6ecff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-background": "#e5e1e4",
+                        "surface-container-high": "#2a2a2c",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#adc6ff",
+                        "primary-container": "#8083ff",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#908fa0",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary-container": "#0566d9",
+                        "surface-container-low": "#1c1b1d",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-on-surface": "#313032",
+                        "primary": "#c0c1ff",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-variant": "#353437",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-bright": "#39393b",
+                        "on-surface": "#e5e1e4",
+                        "on-primary": "#1000a9",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "surface-dim": "#131315",
+                        "surface-container": "#201f22",
+                        "on-tertiary-container": "#003111",
+                        "on-tertiary": "#003915",
+                        "on-tertiary-fixed": "#002109",
+                        "on-error": "#690005",
+                        "background": "#131315"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "2.5rem",
+                        "xl": "2rem",
+                        "md": "1rem",
+                        "xs": "0.25rem",
+                        "base": "4px",
+                        "lg": "1.5rem",
+                        "sm": "0.5rem",
+                        "gutter": "1.5rem",
+                        "margin-mobile": "1rem"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .glass-panel {
+            background-color: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[240px] border-r border-white/5 bg-surface-container-lowest/80 backdrop-blur-xl shadow-2xl flex flex-col h-full py-6 z-50">
+<div class="px-md mb-xl flex flex-col gap-xs">
+<span class="text-body-lg font-headline-lg tracking-tight text-primary dark:text-primary">PropResearch AI</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant">Technical Intelligence</span>
+</div>
+<div class="flex-1 overflow-y-auto px-sm space-y-xs">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-body-md font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">business</span>
+<span class="text-body-md font-body-md">Companies</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">contacts</span>
+<span class="text-body-md font-body-md">Contacts</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">cloud_download</span>
+<span class="text-body-md font-body-md">Outreach</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">calendar_today</span>
+<span class="text-body-md font-body-md">Interviews</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">analytics</span>
+<span class="text-body-md font-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">verified_user</span>
+<span class="text-body-md font-body-md">Compliance</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary dark:text-primary bg-primary/10 border-r-2 border-primary scale-98 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-body-md font-body-md font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out scale-98 active:scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">settings</span>
+<span class="text-body-md font-body-md">Settings</span>
+</a>
+</div>
+<div class="px-md mt-auto pt-md">
+<button class="w-full py-2 px-4 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors flex items-center justify-center gap-sm text-body-md font-body-md">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Research
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[240px] flex flex-col h-full bg-background relative">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-240px)] h-16 border-b border-white/5 backdrop-blur-md bg-surface-container/50 dark:bg-surface-container/50 flex items-center justify-between px-margin-desktop z-40 focus-within:ring-1 focus-within:ring-primary/50">
+<div class="flex items-center gap-xl h-full">
+<nav class="flex h-full gap-lg">
+<a class="flex items-center h-full text-body-md font-body-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-2" href="#">Research Hub</a>
+<a class="flex items-center h-full text-body-md font-body-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-2" href="#">Market Pulse</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="ml-sm h-8 w-8 rounded-full overflow-hidden border border-white/10">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A minimalist user profile avatar showing a stylized geometric face in deep indigo and bright cyan hues, high tech corporate aesthetic, sharp lines, flat lighting, digital illustration style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA187CGg2e7btw8xArT_HiC97kAazI61tKQaedk_3_tBkQHzR0uqjzZAYrqeE5ov8O2zmsIvrzrS4JMD1ywEYaPv3g4ODbXrCDB1P3L6KASwR24u5lt5GLDxn5YFS2Y8zkZpZraMTa4y8F6kcnzSYanKIupQRPYVOzzLByI5hObD7T2540_u3N2cpgjywFrk4GatITD0txws5v_VVRBjLRBjXXdEVRHCDfJ25_Mvq-YA67VsD8rvsmx6Q"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto pt-[80px] pb-xl px-margin-desktop">
+<div class="max-w-[1400px] mx-auto space-y-xl">
+<!-- Header Section -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Reports &amp; Analytics</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-2">Generate and manage exportable data across campaigns.</p>
+</div>
+<button class="bg-inverse-primary text-white px-lg py-sm rounded-lg flex items-center gap-2 hover:bg-inverse-primary/90 transition-colors shadow-[0_2px_10px_rgba(73,75,214,0.3)]">
+<span class="material-symbols-outlined text-[20px]">add_chart</span>
+<span class="text-body-md font-body-md font-medium">Generate New Report</span>
+</button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-lg">
+<!-- Weekly Overview Widget -->
+<div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-lg flex flex-col glow-hover transition-all duration-300">
+<div class="flex justify-between items-center mb-md">
+<h3 class="text-headline-md font-headline-md text-on-surface">Weekly Summary</h3>
+<span class="material-symbols-outlined text-primary">event</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="text-display-lg font-display-lg text-primary">24</div>
+<div class="text-label-mono font-label-mono text-on-surface-variant mt-1 uppercase tracking-wider">Reports Generated</div>
+</div>
+<div class="mt-md pt-md border-t border-white/5 flex gap-2">
+<button class="flex-1 py-2 text-xs font-label-mono text-on-surface-variant hover:text-white bg-white/5 hover:bg-white/10 rounded border border-white/5 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> PDF
+                            </button>
+<button class="flex-1 py-2 text-xs font-label-mono text-on-surface-variant hover:text-white bg-white/5 hover:bg-white/10 rounded border border-white/5 transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">csv</span> CSV
+                            </button>
+</div>
+</div>
+<!-- Campaign Performance -->
+<div class="col-span-12 lg:col-span-8 glass-panel rounded-xl p-lg relative overflow-hidden group">
+<!-- Abstract Background element -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background: radial-gradient(circle at right, rgba(99, 102, 241, 0.4) 0%, transparent 70%);"></div>
+<div class="flex justify-between items-start mb-lg relative z-10">
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Campaign Performance</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Aggregate metrics for active outreach</p>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-md relative z-10">
+<div class="bg-surface-container-low p-md rounded-lg border border-white/5">
+<div class="text-label-mono font-label-mono text-on-surface-variant mb-2">CONVERSION RATE</div>
+<div class="text-headline-lg font-headline-lg text-tertiary">4.2%</div>
+<div class="text-xs font-label-mono text-tertiary-fixed flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">trending_up</span> +0.8%</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg border border-white/5">
+<div class="text-label-mono font-label-mono text-on-surface-variant mb-2">ENGAGEMENT</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">12.5k</div>
+<div class="text-xs font-label-mono text-on-surface-variant flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">trending_flat</span> Stable</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg border border-white/5">
+<div class="text-label-mono font-label-mono text-on-surface-variant mb-2">BOUNCE RATE</div>
+<div class="text-headline-lg font-headline-lg text-on-surface">1.2%</div>
+<div class="text-xs font-label-mono text-error flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">trending_down</span> -0.3%</div>
+</div>
+</div>
+</div>
+<!-- Recent Reports Table -->
+<div class="col-span-12 glass-panel rounded-xl overflow-hidden mt-md">
+<div class="p-lg border-b border-white/5 flex justify-between items-center bg-surface-container-highest/20">
+<h3 class="text-headline-md font-headline-md text-on-surface">Recent Archives</h3>
+<div class="flex gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="bg-surface-container border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 w-64" placeholder="Filter reports..." type="text"/>
+</div>
+</div>
+</div>
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-label-mono font-label-mono text-on-surface-variant border-b border-white/5 bg-surface-container-lowest/50">
+<th class="py-sm px-lg font-medium tracking-wider w-1/3">REPORT NAME</th>
+<th class="py-sm px-lg font-medium tracking-wider">TYPE</th>
+<th class="py-sm px-lg font-medium tracking-wider">GENERATED</th>
+<th class="py-sm px-lg font-medium tracking-wider text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md divide-y divide-white/5">
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="py-md px-lg flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">insert_chart</span>
+</div>
+<span class="text-on-surface font-medium">Q3 EU Logistics Market Pulse</span>
+</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-label-mono bg-primary/10 text-primary border border-primary/20">Monthly</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Oct 24, 2023 · 14:30</td>
+<td class="py-md px-lg text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded hover:bg-white/10 text-on-surface-variant hover:text-white" title="Download PDF"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span></button>
+<button class="p-1.5 rounded hover:bg-white/10 text-on-surface-variant hover:text-white" title="Download Excel"><span class="material-symbols-outlined text-[18px]">table_view</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="py-md px-lg flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<span class="text-on-surface font-medium">London Developer Outreach V2</span>
+</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-label-mono bg-white/5 text-on-surface-variant border border-white/10">Campaign</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Oct 22, 2023 · 09:15</td>
+<td class="py-md px-lg text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded hover:bg-white/10 text-on-surface-variant hover:text-white" title="Download CSV"><span class="material-symbols-outlined text-[18px]">csv</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="py-md px-lg flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+</div>
+<span class="text-on-surface font-medium">Compliance Audit - Sept '23</span>
+</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-label-mono bg-white/5 text-on-surface-variant border border-white/10">System</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Oct 01, 2023 · 00:01</td>
+<td class="py-md px-lg text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded hover:bg-white/10 text-on-surface-variant hover:text-white" title="Download PDF"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

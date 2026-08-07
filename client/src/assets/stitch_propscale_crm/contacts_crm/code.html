@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PropResearch AI - Contacts CRM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "tertiary-container": "#00a74b",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-highest": "#353437",
+                        "on-primary-container": "#0d0096",
+                        "on-secondary": "#002e6a",
+                        "tertiary": "#4ae176",
+                        "surface-tint": "#c0c1ff",
+                        "surface-container-lowest": "#0e0e10",
+                        "surface": "#131315",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "inverse-surface": "#e5e1e4",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-secondary-container": "#e6ecff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-background": "#e5e1e4",
+                        "surface-container-high": "#2a2a2c",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#adc6ff",
+                        "primary-container": "#8083ff",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#908fa0",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary-container": "#0566d9",
+                        "surface-container-low": "#1c1b1d",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-on-surface": "#313032",
+                        "primary": "#c0c1ff",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-variant": "#353437",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-bright": "#39393b",
+                        "on-surface": "#e5e1e4",
+                        "on-primary": "#1000a9",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "surface-dim": "#131315",
+                        "surface-container": "#201f22",
+                        "on-tertiary-container": "#003111",
+                        "on-tertiary": "#003915",
+                        "on-tertiary-fixed": "#002109",
+                        "on-error": "#690005",
+                        "background": "#131315"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "2.5rem",
+                        "xl": "2rem",
+                        "md": "1rem",
+                        "xs": "0.25rem",
+                        "base": "4px",
+                        "lg": "1.5rem",
+                        "sm": "0.5rem",
+                        "gutter": "1.5rem",
+                        "margin-mobile": "1rem"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #c0c1ff, #e1e0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased overflow-hidden selection:bg-primary-container selection:text-on-primary-container h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full py-6 fixed left-0 top-0 w-[240px] border-r border-white/5 bg-surface-container-lowest/80 backdrop-blur-xl shadow-2xl z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
+<span class="material-symbols-outlined text-lg">hexagon</span>
+</div>
+<div>
+<h1 class="text-body-lg font-headline-lg tracking-tight text-primary dark:text-primary leading-tight">PropResearch AI</h1>
+<p class="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">Technical Intelligence</p>
+</div>
+</div>
+<button class="mx-6 mb-8 bg-primary text-on-primary font-label-mono text-label-mono py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+<span class="material-symbols-outlined text-[18px]">add</span>
+            New Research
+        </button>
+<div class="flex-1 overflow-y-auto px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">business</span>
+                Companies
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary dark:text-primary bg-primary/10 border-r-2 border-primary font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">contacts</span>
+                Contacts
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">cloud_download</span>
+                Outreach
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">calendar_today</span>
+                Interviews
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">analytics</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">verified_user</span>
+                Compliance
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">description</span>
+                Reports
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-200 ease-in-out font-body-md scale-98 active:scale-95 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-[20px]">settings</span>
+                Settings
+            </a>
+</div>
+<div class="mt-auto px-6 pt-4 border-t border-white/5">
+<div class="flex items-center gap-3">
+<img alt="User Workspace Avatar" class="w-8 h-8 rounded-full object-cover border border-white/10" data-alt="A small, circular avatar portrait of a professional in a minimalist dark setting with a subtle indigo rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpUwn2LkwJpFzo87mOHJTr3o4tj18Fc3XWLZa3ANMNPSrzGu7j4ZKdvk390x4wVtkXyIpHrILoagcqlCK3B5Fb0nZuW14E0oKBKRSl-vK_pr74d1NZ3hENH6WsVFvOYqukv8SjLeLITKz8o41UXiZ5LCwgPDb_fL6XyBzTaJeCP3GP-WrQpTKWp1Acb9CVBEX6420mrLdcqc_kb2W0DZGaY3ILbdQQUrfDJ0CDkTe6bQlbtGGnGqfaug"/>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-on-surface">Alex Mercer</span>
+<span class="text-xs text-on-surface-variant">Lead Analyst</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-[240px] flex flex-col h-screen relative bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between px-margin-desktop w-full z-40 fixed top-0 right-0 w-[calc(100%-240px)] h-16 bg-surface-container/50 dark:bg-surface-container/50 border-b border-white/5 backdrop-blur-md">
+<div class="flex items-center gap-6">
+<h2 class="font-headline-md text-headline-md text-primary font-bold hidden lg:block">PropResearch AI</h2>
+<div class="relative focus-within:ring-1 focus-within:ring-primary/50 rounded-lg overflow-hidden transition-all duration-200">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="bg-surface-container-highest/50 border-none text-body-md text-on-surface placeholder:text-on-surface-variant/50 pl-10 pr-4 py-1.5 w-64 lg:w-96 focus:ring-0 focus:outline-none transition-all duration-200" placeholder="Search contacts, companies, roles..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden lg:flex items-center gap-6 mr-4">
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-2 py-1 rounded text-body-md" href="#">Research Hub</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors px-2 py-1 rounded text-body-md" href="#">Market Pulse</a>
+</nav>
+<div class="flex items-center gap-2 border-l border-white/10 pl-4">
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors rounded-full">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors rounded-full">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Content Scroll Area -->
+<div class="flex-1 mt-16 overflow-y-auto p-margin-desktop space-y-6">
+<!-- Header & Filters -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+<div>
+<h1 class="text-display-lg font-display-lg text-gradient mb-2">Contacts CRM</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">Manage and monitor key stakeholders across European property management firms.</p>
+</div>
+<div class="flex items-center gap-2 glass-panel p-1 rounded-lg">
+<button class="px-4 py-1.5 rounded bg-primary/20 text-primary border border-primary/30 text-label-mono font-label-mono transition-colors">All (243)</button>
+<button class="px-4 py-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-white/5 text-label-mono font-label-mono transition-colors flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Qualified (89)</button>
+<button class="px-4 py-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-white/5 text-label-mono font-label-mono transition-colors flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>In-Discussion (34)</button>
+<button class="px-4 py-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-white/5 text-label-mono font-label-mono transition-colors flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Contacted (120)</button>
+</div>
+</div>
+<!-- Contacts Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+<!-- Contact Card 1 -->
+<div class="glass-panel p-5 rounded-xl glow-hover transition-all duration-200 group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<img alt="Sarah Jenkins" class="w-14 h-14 rounded-lg object-cover border border-white/10" data-alt="A professional headshot of a female executive in her 40s, wearing a dark blazer, set against a subtle, dark minimalist background with professional lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYNs9Gjh9OLs9hRa6FTO8e212Ve_alcfOcEjH3TdvEXQHma22xhSeZCDxfhalOCQHaHS9rNmirNnFxjz-GVWCwuLE6wmToaLIsUU0kTtb8sjhovAMMxBXXnKMmR0tmp-yfZUqzK26Oq_NDGzmyIZq2MaKCbnJNoxbrLPUfd8JlFm4qgkxUEvzSeca_ipxiJRDuR99Ib-zvJi5UR5xfrgDuoU2jJBoZ7n7V5rE8QtvA6DHkmYjEH-I59w"/>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface text-[18px] leading-tight mb-1">Sarah Jenkins</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-1">Head of Operations</p>
+<div class="flex items-center gap-1.5 text-[11px] font-label-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full w-fit border border-primary/20">
+<span class="material-symbols-outlined text-[12px]">business</span>
+                                Vektor Properties EU
+                            </div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-tertiary/10 text-tertiary text-[10px] font-label-mono uppercase tracking-wider border border-tertiary/20 flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-tertiary"></span> Qualified
+                            </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="LinkedIn Profile">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</button>
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="Send Email">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contact Card 2 -->
+<div class="glass-panel p-5 rounded-xl glow-hover transition-all duration-200 group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<img alt="Marcus Thorne" class="w-14 h-14 rounded-lg object-cover border border-white/10" data-alt="A professional headshot of a male asset manager in his 30s, looking analytical, set against a dark glassmorphic office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAczMOY7ZgiowkKKhWqCo-bf5saak58Wry9lk1Nc6pSVoxbFVuPqI1Vv3oLpmFanHrc-CtBSsDOttfMkVPmIBB-mCYuVUBZDEtWszIheVFciOiZizEWASm58DGzxvCmkAZ_-bJaylQGcYLzAzZQNbaJjnjh8ud7WtW7x02gmSUwpQiuHgB7yoAaJsOyeLQA8-4jICaK7V496fVIW1XVc2DjPWMQe7eOWHMJSjLevbqks5hDmkY2BrJj2w"/>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface text-[18px] leading-tight mb-1">Marcus Thorne</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-1">Senior Asset Manager</p>
+<div class="flex items-center gap-1.5 text-[11px] font-label-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full w-fit border border-primary/20">
+<span class="material-symbols-outlined text-[12px]">business</span>
+                                Altitude Developments
+                            </div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-secondary/10 text-secondary text-[10px] font-label-mono uppercase tracking-wider border border-secondary/20 flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-secondary"></span> In-Discussion
+                            </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="LinkedIn Profile">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</button>
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="Send Email">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contact Card 3 -->
+<div class="glass-panel p-5 rounded-xl glow-hover transition-all duration-200 group relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<img alt="Elena Rostova" class="w-14 h-14 rounded-lg object-cover border border-white/10" data-alt="A professional headshot of a female director of sustainability, softly lit in a dark, sophisticated corporate setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgKfcYm9g4kqT2isM-mrlMwvzOa7V_j9bbACP3bIjXPqnfqGzntakYERbRino_qPGclIEBy2DoDoBBZba88tmJeLLcEuYjuYRVJIsepUAeGD5bc_aHG_jiuY7xZSs29Rm8AgYsAVjxhAHG6AM8HGAdefd2MKafTD6puEB_3hkKfVONABHDATdwciILqJSi2ksOy1H2yvi56azrD5ipr8F4aeXNSP0JPCW17hAoScOueUNhlfOy1LcOyw"/>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface text-[18px] leading-tight mb-1">Elena Rostova</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-1">Director of Sustainability</p>
+<div class="flex items-center gap-1.5 text-[11px] font-label-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full w-fit border border-primary/20">
+<span class="material-symbols-outlined text-[12px]">business</span>
+                                Nordic Green Estates
+                            </div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded bg-outline/10 text-outline-variant text-[10px] font-label-mono uppercase tracking-wider border border-white/10 flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-outline"></span> Contacted
+                            </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="LinkedIn Profile">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</button>
+<button class="p-1.5 rounded-md bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-primary transition-colors border border-white/5" title="Send Email">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
