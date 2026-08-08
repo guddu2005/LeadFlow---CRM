@@ -7,7 +7,7 @@ const createProspect = asyncHandler(async (req, res) => {
 
     const prospect = await prospectService.createProspect(
         req.body,
-        req.user._id
+        req.user
     );
 
     res.status(201).json(
@@ -62,7 +62,7 @@ const updateProspect = asyncHandler(async (req, res) => {
         await prospectService.updateProspect(
             req.params.id,
             req.body,
-            req.user._id
+            req.user
         );
 
     res.status(200).json(
@@ -80,7 +80,8 @@ const deleteProspect = asyncHandler(async (req, res) => {
 
     const prospect =
         await prospectService.deleteProspect(
-            req.params.id
+            req.params.id,
+            req.user
         );
 
     res.status(200).json(
@@ -98,7 +99,7 @@ const convertProspect = asyncHandler(async (req, res) => {
     const result =
         await prospectService.convertProspectToLead(
             req.params.id,
-            req.user._id
+            req.user
         );
 
     res.status(200).json(

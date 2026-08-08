@@ -8,39 +8,77 @@ const fs = require("fs");
 const csv = require("csv-parser");
 
 
-// Create Prospect
+// Helper RBAC check for prospect modification/action permissions
+const verifyProspectPermission = (prospect, user, actionName = "modify") => {
+    if (!user || typeof user !== "object" || !user.role) return true;
 
-const createProspect = async (data, userId) => {
+    const userRole = (user.role || "").toLowerCase();
+    const userId = (user._id || user.id || "").toString();
+
+    // Admin & Manager have full access to view, edit, convert, delete everything
+    if (userRole === "admin" || userRole === "manager") {
+        return true;
+    }
+
+    // Researcher / User: Allowed only if assigned to user, created by user, or unassigned
+    const assignedId = prospect.assignedTo ? prospect.assignedTo.toString() : "";
+    const createdById = prospect.createdBy ? prospect.createdBy.toString() : "";
+
+    if (assignedId && assignedId !== userId && createdById && createdById !== userId) {
+        throw new ApiError(403, `Access Denied: Only Admin, Manager, or the assigned team member can ${actionName} this prospect.`);
+    }
+
+    return true;
+};
+
+const verifyAssignmentPermission = (user) => {
+    if (!user || typeof user !== "object" || !user.role) return true;
+    const userRole = (user.role || "").toLowerCase();
+    if (userRole !== "admin" && userRole !== "manager") {
+        throw new ApiError(403, "Access Denied: Only Admin and Manager can assign or reassign prospects to team members.");
+    }
+    return true;
+};
+
+
+// Create Prospect
+const createProspect = async (data, user) => {
+    const userId = user?._id || user;
+
+    if (data.assignedTo && user && typeof user === "object" && user.role) {
+        const userRole = (user.role || "").toLowerCase();
+        if (userRole !== "admin" && userRole !== "manager" && data.assignedTo.toString() !== userId.toString()) {
+            verifyAssignmentPermission(user);
+        }
+    }
 
     const existingProspect = await Prospect.findOne({
         email: data.email,
         isDeleted: false
     });
 
-
     if (existingProspect) {
-
-        throw new ApiError(
-            400,
-            "Prospect already exists"
-        );
-
+        throw new ApiError(400, "Prospect already exists");
     }
 
-
     const prospect = await Prospect.create({
-
         ...data,
-
         createdBy: userId,
-
         updatedBy: userId
-
     });
 
+    if (prospect.assignedTo && prospect.assignedTo.toString() !== userId.toString()) {
+        notificationService.createNotification({
+            user: prospect.assignedTo,
+            type: "LEAD_ASSIGNED",
+            title: "New Prospect Assigned 🎯",
+            message: `You have been assigned a new prospect: ${prospect.companyName || prospect.contactName}`,
+            referenceId: prospect._id,
+            referenceModel: "Prospect"
+        }).catch(e => console.error("Notification error:", e.message));
+    }
 
     return prospect;
-
 };
 
 
@@ -228,105 +266,76 @@ const getProspectById = async (id) => {
 
 
 // Update Prospect
+const updateProspect = async (id, data, user) => {
+    const userId = user?._id || user;
 
-const updateProspect = async (
-    id,
-    data,
-    userId
-) => {
-
-
-    const prospect =
-        await Prospect.findOne({
-
-            _id: id,
-
-            isDeleted: false
-
-        });
-
-
+    const prospect = await Prospect.findOne({
+        _id: id,
+        isDeleted: false
+    });
 
     if (!prospect) {
-
-        throw new ApiError(
-            404,
-            "Prospect not found"
-        );
-
+        throw new ApiError(404, "Prospect not found");
     }
 
+    // RBAC Permission Check
+    verifyProspectPermission(prospect, user, "update");
 
+    // Check if assignment is changing
+    if (data.assignedTo !== undefined && data.assignedTo !== null) {
+        const currentAssigned = prospect.assignedTo ? prospect.assignedTo.toString() : "";
+        const newAssigned = data.assignedTo ? data.assignedTo.toString() : "";
+        if (currentAssigned !== newAssigned) {
+            verifyAssignmentPermission(user);
 
-    Object.assign(
-        prospect,
-        data
-    );
+            if (newAssigned && newAssigned !== userId.toString()) {
+                notificationService.createNotification({
+                    user: data.assignedTo,
+                    type: "LEAD_ASSIGNED",
+                    title: "New Prospect Assigned 🎯",
+                    message: `You have been assigned a new prospect: ${prospect.companyName || prospect.contactName}`,
+                    referenceId: prospect._id,
+                    referenceModel: "Prospect"
+                }).catch(e => console.error("Notification error:", e.message));
+            }
+        }
+    }
 
-
+    Object.assign(prospect, data);
     prospect.updatedBy = userId;
 
-
     await prospect.save();
-
-
-
     return prospect;
-
 };
 
 
-
 // Delete Prospect (Soft Delete)
-
-const deleteProspect = async (id) => {
-
-
-    const prospect =
-        await Prospect.findOne({
-
-            _id: id,
-
-            isDeleted: false
-
-        });
-
-
+const deleteProspect = async (id, user) => {
+    const prospect = await Prospect.findOne({
+        _id: id,
+        isDeleted: false
+    });
 
     if (!prospect) {
-
-        throw new ApiError(
-            404,
-            "Prospect not found"
-        );
-
+        throw new ApiError(404, "Prospect not found");
     }
 
-
+    // RBAC Permission Check
+    verifyProspectPermission(prospect, user, "delete");
 
     prospect.isDeleted = true;
-
-
     await prospect.save();
 
-
-
     return prospect;
-
 };
 
 const mongoose = require("mongoose");
 
-const convertProspectToLead = async (
-    prospectId,
-    userId
-) => {
+const convertProspectToLead = async (prospectId, user) => {
+    const userId = user?._id || user;
 
     if (!mongoose.Types.ObjectId.isValid(prospectId)) {
-        throw new ApiError(
-            400,
-            "Invalid Prospect ID format"
-        );
+        throw new ApiError(400, "Invalid Prospect ID format");
     }
 
     const prospect = await Prospect.findOne({
@@ -335,17 +344,14 @@ const convertProspectToLead = async (
     });
 
     if (!prospect) {
-        throw new ApiError(
-            404,
-            "Prospect not found"
-        );
+        throw new ApiError(404, "Prospect not found");
     }
 
+    // RBAC Permission Check
+    verifyProspectPermission(prospect, user, "convert");
+
     if (prospect.converted) {
-        throw new ApiError(
-            400,
-            "Prospect already converted"
-        );
+        throw new ApiError(400, "Prospect already converted");
     }
 
     // 1. Find or create Company for this prospect

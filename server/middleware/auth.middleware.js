@@ -23,9 +23,11 @@ const protect = asyncHandler(async (req, res, next) => {
 
 
 const authorize = (...roles) => {
+    const allowedRoles = roles.map((r) => r.toLowerCase());
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return next(new ApiError(403, "User role not authorized to access this route"));
+        const userRole = (req.user?.role || "").toLowerCase();
+        if (!allowedRoles.includes(userRole)) {
+            return next(new ApiError(403, `User role (${req.user?.role}) is not authorized to access this route`));
         }
         next();
     };

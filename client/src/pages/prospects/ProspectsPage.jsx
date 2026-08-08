@@ -34,6 +34,12 @@ export default function ProspectsPage() {
     const [statusFilter, setStatusFilter] = useState("all");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [usersList, setUsersList] = useState([]);
+
+    // Current Logged In User
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const userRole = (currentUser.role || "").toLowerCase();
+    const isAdminOrManager = userRole === "admin" || userRole === "manager";
 
     // Modals state
     const [showAddModal, setShowAddModal] = useState(false);
@@ -55,6 +61,7 @@ export default function ProspectsPage() {
         status: "Not Contacted",
         signal: "High Intent",
         currentSoftware: "Legacy CRM",
+        assignedTo: "",
         notes: "",
     });
 
@@ -84,9 +91,31 @@ export default function ProspectsPage() {
         }
     };
 
+    const fetchUsersList = async () => {
+        if (isAdminOrManager) {
+            try {
+                const res = await api.get("/auth/users");
+                const list = res.data?.data || res.data?.users || [];
+                if (Array.isArray(list)) setUsersList(list);
+            } catch (err) {
+                console.error("User list fetch error:", err);
+            }
+        }
+    };
+
     useEffect(() => {
         fetchProspects();
+        fetchUsersList();
     }, [page, statusFilter]);
+
+    // Check if user can modify a specific prospect
+    const canModifyProspect = (p) => {
+        if (isAdminOrManager) return true;
+        const assignedId = p.assignedTo?._id || p.assignedTo || "";
+        const createdById = p.createdBy?._id || p.createdBy || "";
+        const currentId = currentUser._id || currentUser.id || "";
+        return !assignedId || assignedId === currentId || createdById === currentId;
+    };
 
     // Handle Search submit
     const handleSearchSubmit = (e) => {
@@ -111,6 +140,7 @@ export default function ProspectsPage() {
                 status: prospect.status || "Not Contacted",
                 signal: prospect.signal || "High Intent",
                 currentSoftware: prospect.currentSoftware || "",
+                assignedTo: prospect.assignedTo?._id || prospect.assignedTo || "",
                 notes: prospect.notes || "",
             });
         } else {
@@ -127,6 +157,7 @@ export default function ProspectsPage() {
                 status: "Not Contacted",
                 signal: "High Intent",
                 currentSoftware: "",
+                assignedTo: "",
                 notes: "",
             });
         }
@@ -156,6 +187,10 @@ export default function ProspectsPage() {
                 currentSoftware: formData.currentSoftware,
                 notes: formData.notes,
             };
+
+            if (formData.assignedTo) {
+                payload.assignedTo = formData.assignedTo;
+            }
 
             if (editingProspect) {
                 await api.patch(`/prospects/${editingProspect._id}`, payload);
@@ -406,6 +441,7 @@ export default function ProspectsPage() {
                                         <th className="py-3.5 px-4">Contact Info</th>
                                         <th className="py-3.5 px-4">Location & Legal Guard</th>
                                         <th className="py-3.5 px-4">Signal / Software</th>
+                                        <th className="py-3.5 px-4">Assigned To</th>
                                         <th className="py-3.5 px-4">Status</th>
                                         <th className="py-3.5 px-4 text-right">Actions</th>
                                     </tr>
@@ -416,6 +452,7 @@ export default function ProspectsPage() {
                                         const contName = p.contactName || p.contact || "Primary Contact";
                                         const isConverted = p.converted || p.convertedToLead;
                                         const compGuard = getComplianceBadge(p.location?.country || p.country);
+                                        const canModify = canModifyProspect(p);
 
                                         return (
                                             <tr key={p._id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
@@ -478,6 +515,18 @@ export default function ProspectsPage() {
                                                     </div>
                                                 </td>
 
+                                                {/* Assigned To */}
+                                                <td className="py-3.5 px-4">
+                                                    {p.assignedTo ? (
+                                                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 w-max">
+                                                            <UserCheck className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                                            <span>{p.assignedTo.firstName} {p.assignedTo.lastName || ""}</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[11px] text-slate-400 italic font-medium">Unassigned</span>
+                                                    )}
+                                                </td>
+
                                                 {/* Status Pill */}
                                                 <td className="py-3.5 px-4">
                                                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-block ${
@@ -498,8 +547,14 @@ export default function ProspectsPage() {
                                                     <div className="flex items-center justify-end gap-1.5">
                                                         {!isConverted && (
                                                             <button
-                                                                onClick={() => handleConvert(p._id)}
-                                                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold shadow transition-colors flex items-center gap-1 cursor-pointer"
+                                                                onClick={() => canModify ? handleConvert(p._id) : toast.error("Only Admin, Manager, or Assigned User can convert this prospect")}
+                                                                disabled={!canModify}
+                                                                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold shadow transition-colors flex items-center gap-1 ${
+                                                                    canModify
+                                                                        ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                                                                        : "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60"
+                                                                }`}
+                                                                title={canModify ? "Convert Prospect to Lead" : "Assigned to another team member"}
                                                             >
                                                                 <UserCheck className="w-3.5 h-3.5" />
                                                                 <span>Convert</span>
@@ -507,8 +562,14 @@ export default function ProspectsPage() {
                                                         )}
 
                                                         <button
-                                                            onClick={() => handleOpenAddModal(p)}
-                                                            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                                                            onClick={() => canModify ? handleOpenAddModal(p) : toast.error("Only Admin, Manager, or Assigned User can edit this prospect")}
+                                                            disabled={!canModify}
+                                                            className={`p-1.5 rounded-lg border transition-colors ${
+                                                                canModify
+                                                                    ? "border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+                                                                    : "border-slate-100 dark:border-slate-800/40 text-slate-400 cursor-not-allowed opacity-50"
+                                                            }`}
+                                                            title={canModify ? "Edit Prospect" : "Assigned to another team member"}
                                                         >
                                                             <Edit3 className="w-3.5 h-3.5" />
                                                         </button>
@@ -767,6 +828,26 @@ export default function ProspectsPage() {
                                     />
                                 </div>
                             </div>
+
+                            {isAdminOrManager && (
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase text-indigo-600 dark:text-indigo-400">
+                                        Assign To Team Member (Admin / Manager Only)
+                                    </label>
+                                    <select
+                                        value={formData.assignedTo}
+                                        onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-purple-50/50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
+                                    >
+                                        <option value="">-- Unassigned --</option>
+                                        {usersList.map((u) => (
+                                            <option key={u._id} value={u._id}>
+                                                {u.firstName} {u.lastName} ({u.role})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
                                 <button

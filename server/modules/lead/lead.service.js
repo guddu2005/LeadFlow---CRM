@@ -164,11 +164,36 @@ const getLeadById = async (id) => {
     return lead;
 };
 
-const updateLead = async (
-    id,
-    leadData,
-    userId
-) => {
+const verifyLeadPermission = (lead, user, actionName = "modify") => {
+    if (!user || typeof user !== "object" || !user.role) return true;
+    const userRole = (user.role || "").toLowerCase();
+    const userId = (user._id || user.id || "").toString();
+
+    if (userRole === "admin" || userRole === "manager") {
+        return true;
+    }
+
+    const assignedId = lead.assignedTo ? lead.assignedTo.toString() : "";
+    const createdById = lead.createdBy ? lead.createdBy.toString() : "";
+
+    if (assignedId && assignedId !== userId && createdById && createdById !== userId) {
+        throw new ApiError(403, `Access Denied: Only Admin, Manager, or the assigned team member can ${actionName} this lead.`);
+    }
+
+    return true;
+};
+
+const verifyLeadAssignPermission = (user) => {
+    if (!user || typeof user !== "object" || !user.role) return true;
+    const userRole = (user.role || "").toLowerCase();
+    if (userRole !== "admin" && userRole !== "manager") {
+        throw new ApiError(403, "Access Denied: Only Admin and Manager can assign or reassign leads to team members.");
+    }
+    return true;
+};
+
+const updateLead = async (id, leadData, user) => {
+    const userId = user?._id || user;
 
     const lead = await Lead.findOne({
         _id: id,
@@ -179,13 +204,21 @@ const updateLead = async (
         throw new ApiError(404, "Lead not found");
     }
 
+    // RBAC Permission Check
+    verifyLeadPermission(lead, user, "update");
+
+    // Check if assignment is changing
+    if (leadData.assignedTo !== undefined && leadData.assignedTo !== null) {
+        const currentAssigned = lead.assignedTo ? lead.assignedTo.toString() : "";
+        const newAssigned = leadData.assignedTo ? leadData.assignedTo.toString() : "";
+        if (currentAssigned !== newAssigned) {
+            verifyLeadAssignPermission(user);
+        }
+    }
+
     if (leadData.company || leadData.contact) {
-
-        const companyId =
-            leadData.company || lead.company;
-
-        const contactId =
-            leadData.contact || lead.contact;
+        const companyId = leadData.company || lead.company;
+        const contactId = leadData.contact || lead.contact;
 
         const contact = await Contact.findOne({
             _id: contactId,
@@ -194,10 +227,7 @@ const updateLead = async (
         });
 
         if (!contact) {
-            throw new ApiError(
-                404,
-                "Contact does not belong to selected company"
-            );
+            throw new ApiError(404, "Contact does not belong to selected company");
         }
 
         const duplicate = await Lead.findOne({
@@ -208,24 +238,18 @@ const updateLead = async (
         });
 
         if (duplicate) {
-            throw new ApiError(
-                409,
-                "Lead already exists"
-            );
+            throw new ApiError(409, "Lead already exists");
         }
     }
 
     Object.assign(lead, leadData);
-
     lead.updatedBy = userId;
 
     await lead.save();
-
     return await getLeadById(lead._id);
 };
 
-const deleteLead = async (id) => {
-
+const deleteLead = async (id, user) => {
     const lead = await Lead.findOne({
         _id: id,
         isDeleted: false
@@ -235,8 +259,10 @@ const deleteLead = async (id) => {
         throw new ApiError(404, "Lead not found");
     }
 
-    lead.isDeleted = true;
+    // RBAC Permission Check
+    verifyLeadPermission(lead, user, "delete");
 
+    lead.isDeleted = true;
     await lead.save();
 
     return lead;
@@ -328,8 +354,10 @@ const getLeadStats = async () => {
 const assignLead = async (
     leadId,
     assignedTo,
-    userId
+    user
 ) => {
+    const userId = user?._id || user;
+    verifyLeadAssignPermission(user);
 
     const lead = await Lead.findOne({
         _id: leadId,
@@ -343,11 +371,11 @@ const assignLead = async (
         );
     }
 
-    const user = await User.findById(
+    const targetUser = await User.findById(
         assignedTo
     );
 
-    if (!user) {
+    if (!targetUser) {
         throw new ApiError(
             404,
             "User not found"

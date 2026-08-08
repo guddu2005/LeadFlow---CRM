@@ -57,7 +57,7 @@ exports.updateLead = asyncHandler(async (req, res) => {
     const lead = await leadService.updateLead(
         req.params.id,
         req.body,
-        req.user._id
+        req.user
     );
 
     res.status(200).json(
@@ -73,7 +73,8 @@ exports.updateLead = asyncHandler(async (req, res) => {
 exports.deleteLead = asyncHandler(async (req, res) => {
 
     await leadService.deleteLead(
-        req.params.id
+        req.params.id,
+        req.user
     );
 
     res.status(200).json(
@@ -119,7 +120,7 @@ exports.assignLead = asyncHandler(async (req, res) => {
     const lead = await leadService.assignLead(
         req.params.id,
         req.body.assignedTo,
-        req.user._id
+        req.user
     );
 
     res.status(200).json(

@@ -12,7 +12,7 @@ router.post("/register", register);
 
 router.post("/login", login);
 router.get("/me", protect, getCurrentUser);
-router.get("/users", protect, authorize("admin"), getUsers);
+router.get("/users", protect, authorize("admin", "manager"), getUsers);
 router.post("/logout", protect, logout);
 router.post("/forgot-password", forgotPassword);
 
