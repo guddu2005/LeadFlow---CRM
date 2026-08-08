@@ -31,64 +31,42 @@ const createOutreach = async (data, userId) => {
 
     }
 
-    // Find Template
-    const template = await MessageTemplate.findById(
-        data.template
-    );
+    let templateId = null;
+    let templateVersion = "A";
+    let subject = data.subject || `Outreach to ${prospect.companyName || prospect.contactName}`;
+    let message = data.message || `Hi ${prospect.contactName},\n\nWe are conducting research on proptech workflows.`;
 
-    if (!template) {
-
-        throw new ApiError(
-            404,
-            "Message Template not found"
-        );
-
+    if (data.template) {
+        const template = await MessageTemplate.findById(data.template);
+        if (template) {
+            templateId = template._id;
+            templateVersion = template.version;
+            const rendered = renderTemplate(template, prospect);
+            subject = rendered.subject;
+            message = rendered.message;
+        }
     }
-
-    // Render Template
-    const rendered = renderTemplate(
-        template,
-        prospect
-    );
 
     // Create Outreach
     const outreach = await Outreach.create({
-
         prospect: prospect._id,
-
-        template: template._id,
-
-        templateVersion: template.version,
-
-        channel: data.channel,
-
-        sequenceType:
-            data.sequenceType || "Initial",
-
+        template: templateId,
+        templateVersion,
+        channel: data.channel || "Email",
+        sequenceType: data.sequenceType || "Initial",
         sequenceStep:
             data.sequenceType === "Follow Up 1"
                 ? 2
                 : data.sequenceType === "Follow Up 2"
                 ? 3
                 : 1,
-
-        subject: rendered.subject,
-
-        message: rendered.message,
-
-        scheduledAt: data.scheduledAt,
-
-        assignedTo:
-            data.assignedTo ||
-            prospect.assignedTo,
-
-        notes:
-            data.notes || "",
-
+        subject,
+        message,
+        scheduledAt: data.scheduledAt || new Date(),
+        assignedTo: data.assignedTo || prospect.assignedTo,
+        notes: data.notes || "",
         createdBy: userId,
-
         updatedBy: userId
-
     });
 
     // Notification
