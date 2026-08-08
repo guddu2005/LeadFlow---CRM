@@ -98,7 +98,7 @@ export default function ContactsPage() {
         setEmailForm({
             to: contact.email || "",
             subject: `LeadFlow Research Invitation for ${contact.firstName || "Contact"}`,
-            html: `Hi ${contact.firstName || "there"},\n\nI came across your profile as ${contact.jobTitle || "Executive"}. We are conducting a research study on real estate operations.\n\nWould you be open for a short 15-minute conversation next week?\n\nBest regards,\nGuddu Kumar`,
+            html: `<p>Hi <strong>${contact.firstName || "there"}</strong>,</p><p>I came across your profile as ${contact.jobTitle || "Executive"}. We built LeadFlow CRM to help real estate teams automate lead pipeline tracking and instant email outreach.</p><p>Would you be open for a brief 15-minute discovery call next week?</p><p>Best regards,<br/><strong>LeadFlow Team</strong></p>`,
         });
         setShowEmailModal(true);
     };

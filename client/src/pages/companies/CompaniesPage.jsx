@@ -190,6 +190,7 @@ export default function CompaniesPage() {
                                         <th className="py-3.5 px-4">Company Name</th>
                                         <th className="py-3.5 px-4">Website</th>
                                         <th className="py-3.5 px-4">Location</th>
+                                        <th className="py-3.5 px-4">Assigned To</th>
                                         <th className="py-3.5 px-4">Origin Status</th>
                                         <th className="py-3.5 px-4 text-right">Actions</th>
                                     </tr>
@@ -231,6 +232,18 @@ export default function CompaniesPage() {
                                                         <MapPin className="w-3.5 h-3.5 text-slate-400" />
                                                         <span>{c.city || c.location?.city}{c.city && c.country ? ", " : ""}{c.country || c.location?.country || "Global"}</span>
                                                     </div>
+                                                </td>
+
+                                                {/* Assigned To */}
+                                                <td className="py-3.5 px-4">
+                                                    {c.assignedTo ? (
+                                                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 w-max">
+                                                            <Users className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                                            <span>{c.assignedTo.firstName} {c.assignedTo.lastName || ""}</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[11px] text-slate-400 italic font-medium">Unassigned</span>
+                                                    )}
                                                 </td>
 
                                                 <td className="py-3.5 px-4">
