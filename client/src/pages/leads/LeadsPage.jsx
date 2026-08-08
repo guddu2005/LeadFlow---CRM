@@ -36,6 +36,22 @@ export default function LeadsPage() {
     const [priorityFilter, setPriorityFilter] = useState("all");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [usersList, setUsersList] = useState([]);
+
+    // Current Logged In User
+    const getCurrentUserSafe = () => {
+        try {
+            const item = localStorage.getItem("leadflow_user") || localStorage.getItem("user");
+            if (!item || item === "undefined" || item === "null") return {};
+            return JSON.parse(item);
+        } catch (e) {
+            return {};
+        }
+    };
+
+    const currentUser = getCurrentUserSafe();
+    const userRole = (currentUser.role || "").toLowerCase();
+    const isAdminOrManager = userRole === "admin" || userRole === "manager";
 
     // Modal State
     const [showModal, setShowModal] = useState(false);
@@ -63,6 +79,7 @@ export default function LeadsPage() {
         status: "Not Contacted",
         priority: "Medium",
         source: "Manual",
+        assignedTo: "",
         notes: "",
     });
 
@@ -98,15 +115,37 @@ export default function LeadsPage() {
             }
         } catch (err) {
             console.error("Fetch leads error:", err);
-            setLeads(mockLeads);
+            setLeads([]);
         } finally {
             setLoading(false);
         }
     };
 
+    const fetchUsersList = async () => {
+        if (isAdminOrManager) {
+            try {
+                const res = await api.get("/auth/users");
+                const list = res.data?.data || res.data?.users || [];
+                if (Array.isArray(list)) setUsersList(list);
+            } catch (err) {
+                console.error("User list fetch error:", err);
+            }
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchUsersList();
     }, [page, statusFilter, priorityFilter]);
+
+    // Check if user can modify a specific lead
+    const canModifyLead = (l) => {
+        if (isAdminOrManager) return true;
+        const assignedId = l.assignedTo?._id || l.assignedTo || "";
+        const createdById = l.createdBy?._id || l.createdBy || "";
+        const currentId = currentUser._id || currentUser.id || "";
+        return !assignedId || assignedId === currentId || createdById === currentId;
+    };
 
     // Open Modal
     const handleOpenModal = (leadItem = null) => {
@@ -122,6 +161,7 @@ export default function LeadsPage() {
                 status: leadItem.status || "Not Contacted",
                 priority: leadItem.priority || "Medium",
                 source: leadItem.source || "Manual",
+                assignedTo: leadItem.assignedTo?._id || leadItem.assignedTo || "",
                 notes: leadItem.notes || "",
             });
         } else {
@@ -136,6 +176,7 @@ export default function LeadsPage() {
                 status: "Not Contacted",
                 priority: "Medium",
                 source: "Manual",
+                assignedTo: "",
                 notes: "",
             });
         }
@@ -384,6 +425,7 @@ export default function LeadsPage() {
                                     <tr className="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 uppercase tracking-wider font-bold">
                                         <th className="py-3.5 px-4">Company & Contact</th>
                                         <th className="py-3.5 px-4">Contact Info</th>
+                                        <th className="py-3.5 px-4">Assigned To</th>
                                         <th className="py-3.5 px-4">Pipeline Status</th>
                                         <th className="py-3.5 px-4">Schedule Meeting</th>
                                         <th className="py-3.5 px-4">Company Conversion</th>
@@ -395,6 +437,7 @@ export default function LeadsPage() {
                                         const compName = l.companyName || l.company?.companyName || "Lead Company";
                                         const contName = l.contact?.firstName ? `${l.contact.firstName} ${l.contact.lastName || ""}` : "Primary Contact";
                                         const isConverted = l.isConvertedToCompany || l.company;
+                                        const canModify = canModifyLead(l);
 
                                         return (
                                             <tr key={l._id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
@@ -426,11 +469,26 @@ export default function LeadsPage() {
                                                     )}
                                                 </td>
 
+                                                {/* Assigned To */}
+                                                <td className="py-3.5 px-4">
+                                                    {l.assignedTo ? (
+                                                        <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 w-max">
+                                                            <Users className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                                            <span>{l.assignedTo.firstName} {l.assignedTo.lastName || ""}</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[11px] text-slate-400 italic font-medium">Unassigned</span>
+                                                    )}
+                                                </td>
+
                                                 <td className="py-3.5 px-4">
                                                     <select
+                                                        disabled={!canModify}
                                                         value={l.status || "Not Contacted"}
-                                                        onChange={(e) => handleUpdateStatus(l._id, e.target.value)}
-                                                        className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 cursor-pointer"
+                                                        onChange={(e) => canModify ? handleUpdateStatus(l._id, e.target.value) : toast.error("Only Admin, Manager, or Assigned User can update this lead")}
+                                                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 ${
+                                                            canModify ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+                                                        }`}
                                                     >
                                                         <option value="Not Contacted">Not Contacted</option>
                                                         <option value="Contacted">Contacted</option>
@@ -459,8 +517,13 @@ export default function LeadsPage() {
                                                         </span>
                                                     ) : (
                                                         <button
-                                                            onClick={() => handleConvertToCompany(l._id)}
-                                                            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[11px] font-semibold border transition-all flex items-center gap-1.5 cursor-pointer"
+                                                            onClick={() => canModify ? handleConvertToCompany(l._id) : toast.error("Only Admin, Manager, or Assigned User can convert this lead")}
+                                                            disabled={!canModify}
+                                                            className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
+                                                                canModify
+                                                                    ? "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 cursor-pointer"
+                                                                    : "bg-slate-100/50 dark:bg-slate-800/40 text-slate-400 cursor-not-allowed opacity-50"
+                                                            }`}
                                                         >
                                                             <Building2 className="w-3.5 h-3.5 text-indigo-600" />
                                                             <span>Convert to Company</span>
@@ -470,8 +533,30 @@ export default function LeadsPage() {
 
                                                 <td className="py-3.5 px-4 text-right">
                                                     <div className="flex items-center justify-end gap-1.5">
-                                                        <button onClick={() => handleOpenModal(l)} className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 text-slate-600"><Edit3 className="w-3.5 h-3.5" /></button>
-                                                        <button onClick={() => handleDelete(l._id)} className="p-1.5 rounded-lg border border-red-200 dark:border-red-950 hover:bg-red-50 text-red-600 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                        <button
+                                                            onClick={() => canModify ? handleOpenModal(l) : toast.error("Only Admin, Manager, or Assigned User can edit this lead")}
+                                                            disabled={!canModify}
+                                                            className={`p-1.5 rounded-lg border transition-colors ${
+                                                                canModify
+                                                                    ? "border-slate-200 dark:border-slate-800 hover:bg-slate-100 text-slate-600 cursor-pointer"
+                                                                    : "border-slate-100 text-slate-400 cursor-not-allowed opacity-50"
+                                                            }`}
+                                                            title={canModify ? "Edit Lead" : "Assigned to another team member"}
+                                                        >
+                                                            <Edit3 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => canModify ? handleDelete(l._id) : toast.error("Only Admin, Manager, or Assigned User can delete this lead")}
+                                                            disabled={!canModify}
+                                                            className={`p-1.5 rounded-lg border transition-colors ${
+                                                                canModify
+                                                                    ? "border-red-200 dark:border-red-950 hover:bg-red-50 text-red-600 cursor-pointer"
+                                                                    : "border-slate-100 text-slate-400 cursor-not-allowed opacity-50"
+                                                            }`}
+                                                            title={canModify ? "Delete Lead" : "Assigned to another team member"}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
                                                     </div>
                                                 </td>
 
@@ -698,6 +783,26 @@ export default function LeadsPage() {
                                     </select>
                                 </div>
                             </div>
+
+                            {isAdminOrManager && (
+                                <div className="space-y-1">
+                                    <label className="block text-xs font-bold uppercase text-indigo-600 dark:text-indigo-400">
+                                        Assign To Team Member (Admin / Manager Only)
+                                    </label>
+                                    <select
+                                        value={formData.assignedTo}
+                                        onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-purple-50/50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
+                                    >
+                                        <option value="">-- Unassigned --</option>
+                                        {usersList.map((u) => (
+                                            <option key={u._id} value={u._id}>
+                                                {u.firstName} {u.lastName} ({u.role})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
                                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border text-xs">Cancel</button>
