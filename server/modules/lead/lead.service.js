@@ -12,6 +12,7 @@ const notificationService = require("../notification/notification.service");
 const createLead = async (leadData, userId) => {
     let companyId = leadData.company;
     let contactId = leadData.contact;
+    const assignedUser = leadData.assignedTo || null;
 
     if (!companyId && leadData.companyName) {
         let comp = await Company.findOne({ companyName: leadData.companyName, isDeleted: false });
@@ -19,7 +20,7 @@ const createLead = async (leadData, userId) => {
             comp = await Company.create({
                 companyName: leadData.companyName,
                 website: leadData.website || "",
-                assignedTo: leadData.assignedTo || userId,
+                assignedTo: assignedUser,
                 createdBy: userId,
                 updatedBy: userId
             });
@@ -43,6 +44,7 @@ const createLead = async (leadData, userId) => {
                 phone: leadData.phone || "",
                 jobTitle: leadData.jobTitle || "Executive",
                 company: companyId,
+                assignedTo: assignedUser,
                 createdBy: userId,
                 updatedBy: userId
             });
@@ -54,7 +56,7 @@ const createLead = async (leadData, userId) => {
         ...leadData,
         company: companyId,
         contact: contactId,
-        assignedTo: leadData.assignedTo || userId,
+        assignedTo: assignedUser,
         createdBy: userId,
         updatedBy: userId
     });
@@ -89,7 +91,9 @@ const getLeads = async (query, user) => {
         if (!assignedTo) {
             filter.$or = [
                 { assignedTo: user._id },
-                { createdBy: user._id }
+                { createdBy: user._id },
+                { assignedTo: null },
+                { assignedTo: { $exists: false } }
             ];
         }
     }
@@ -457,7 +461,7 @@ const convertLeadToCompany = async (leadId, userId) => {
         notes: lead.notes || "",
         contactsCount: 1,
         leadCount: 1,
-        assignedTo: lead.assignedTo || userId,
+        assignedTo: lead.assignedTo || null,
         createdBy: userId,
         updatedBy: userId
     });

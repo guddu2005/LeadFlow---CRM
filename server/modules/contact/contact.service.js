@@ -354,7 +354,9 @@ const getAllContacts = async (query, user) => {
     if (user && userRole !== "admin" && userRole !== "manager") {
         const rbacOr = [
             { assignedTo: user._id },
-            { createdBy: user._id }
+            { createdBy: user._id },
+            { assignedTo: null },
+            { assignedTo: { $exists: false } }
         ];
         if (!filter.$or) {
             filter.$or = rbacOr;

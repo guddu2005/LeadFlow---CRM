@@ -360,6 +360,8 @@ const convertProspectToLead = async (prospectId, user) => {
         isDeleted: false
     });
 
+    const assignedUser = prospect.assignedTo || null;
+
     if (!company) {
         company = await Company.create({
             companyName: prospect.companyName || "Converted Prospect Company",
@@ -367,13 +369,13 @@ const convertProspectToLead = async (prospectId, user) => {
             country: prospect.location?.country || "",
             city: prospect.location?.city || "",
             employeeCount: prospect.employeeCount || 0,
-            assignedTo: prospect.assignedTo || userId,
+            assignedTo: assignedUser,
             createdBy: userId,
             updatedBy: userId
         });
     } else {
-        if (!company.assignedTo && prospect.assignedTo) {
-            company.assignedTo = prospect.assignedTo;
+        if (assignedUser) {
+            company.assignedTo = assignedUser;
             await company.save();
         }
     }
@@ -392,7 +394,7 @@ const convertProspectToLead = async (prospectId, user) => {
         phone: prospect.phone || "",
         jobTitle: prospect.jobTitle || "",
         isPrimary: true,
-        assignedTo: prospect.assignedTo || userId,
+        assignedTo: assignedUser,
         createdBy: userId,
         updatedBy: userId
     });
@@ -407,7 +409,7 @@ const convertProspectToLead = async (prospectId, user) => {
         status: "Not Contacted",
         notes: prospect.notes || "",
         signal: prospect.signal || "",
-        assignedTo: prospect.assignedTo || userId,
+        assignedTo: assignedUser,
         isConvertedToCompany: false,
         createdBy: userId,
         updatedBy: userId

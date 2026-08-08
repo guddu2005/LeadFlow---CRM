@@ -92,13 +92,15 @@ const getCompanies = async (query) => {
     if (companyType) filter.companyType = companyType;
     if (assignedTo) filter.assignedTo = assignedTo;
 
-    // RBAC: Non-admin and non-manager roles see companies assigned to them OR created by them
+    // RBAC: Non-admin and non-manager roles see companies assigned to them, created by them, or unassigned
     const userRole = (user?.role || "").toLowerCase();
     if (user && userRole !== "admin" && userRole !== "manager") {
         if (!assignedTo) {
             const rbacOr = [
                 { assignedTo: user._id },
-                { createdBy: user._id }
+                { createdBy: user._id },
+                { assignedTo: null },
+                { assignedTo: { $exists: false } }
             ];
             if (!filter.$or) {
                 filter.$or = rbacOr;
