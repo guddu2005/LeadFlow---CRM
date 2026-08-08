@@ -82,8 +82,7 @@ const scheduleInterview = async (data, userId) => {
         minute: "2-digit"
     });
     const candidateFullName = `${lead.contact?.firstName || data.candidateName || "Contact"} ${lead.contact?.lastName || ""}`.trim();
-    const leadCompanyName = lead.companyName || lead.company?.companyName || "PropScale Management UK";
-    const candidateEmail = data.candidateEmail || data.email || lead.contact?.email;
+    const candidateEmail = data.candidateEmail || data.email || lead?.contact?.email || researcherUser?.email;
 
     // Fire-and-forget background email & notification dispatches (degraded to setImmediate for 0ms blocking)
     setImmediate(async () => {

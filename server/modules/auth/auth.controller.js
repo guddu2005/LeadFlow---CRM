@@ -35,7 +35,13 @@ const register = asyncHandler(async (req, res) => {
     // Send Welcome Email in background
     try {
         const emailService = require("../email/email.service");
-        emailService.sendWelcomeEmail(user).catch((err) => console.error("Welcome email send error:", err.message));
+        emailService.sendWelcomeEmail({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role
+        }).then(() => console.log(`✅ Welcome Email dispatched to ${user.email}`))
+          .catch((err) => console.error("Welcome email send error:", err.message));
     } catch (err) {
         console.error("Welcome email send error:", err);
     }

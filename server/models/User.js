@@ -30,8 +30,9 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ["admin", "manager", "researcher"],
-        default: "researcher"
+        enum: ["admin", "manager", "researcher", "user", "Admin", "Manager", "Researcher", "User"],
+        default: "researcher",
+        set: v => (v ? v.toLowerCase() : "researcher")
     },
 
     isActive: {
