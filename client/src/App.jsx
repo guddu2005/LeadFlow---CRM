@@ -27,7 +27,17 @@ function App() {
         <ThemeProvider>
             <AuthProvider>
                 <Router>
-                    <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+                    <Toaster
+                        position="top-right"
+                        toastOptions={{
+                            duration: 4000,
+                            style: {
+                                borderRadius: "12px",
+                                fontSize: "13px",
+                                fontWeight: "600",
+                            },
+                        }}
+                    />
                     <Routes>
                         {/* Public Routes */}
                         <Route path="/" element={<Home />} />

@@ -157,3 +157,31 @@ html, body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* ===================================================
+   TOASTER DARK MODE & LIGHT MODE ACCESSIBILITY FIX
+   =================================================== */
+/* React Hot Toast container overrides for dark mode readability */
+div[role="status"],
+div[role="alert"],
+.go2007694884 {
+  background-color: #FFFFFF !important;
+  color: #09090B !important;
+  border: 1px solid #E4E4E7 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark div[role="status"],
+.dark div[role="alert"],
+.dark .go2007694884 {
+  background-color: #18181B !important;
+  color: #FAFAFA !important;
+  border: 1px solid #27272A !important;
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8) !important;
+}
+
+div[role="status"] *,
+div[role="alert"] *,
+.go2007694884 * {
+  color: inherit !important;
+}
