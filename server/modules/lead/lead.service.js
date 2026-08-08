@@ -426,6 +426,7 @@ const convertLeadToCompany = async (leadId, userId) => {
         notes: lead.notes || "",
         contactsCount: 1,
         leadCount: 1,
+        assignedTo: lead.assignedTo || userId,
         createdBy: userId,
         updatedBy: userId
     });

@@ -37,6 +37,26 @@ const sendEmail = async ({ to, subject, html }) => {
 
             if (response.error) {
                 console.error("❌ Resend API returned error:", response.error.message);
+                const errMsg = response.error.message || "";
+                if (errMsg.includes("only send testing emails") || response.error.name === "validation_error" || errMsg.includes("verify a domain")) {
+                    const ownerEmail = process.env.TEST_EMAIL_RECIPIENT || "bt23cse242@shivalikcollege.edu.in";
+                    console.log(`ℹ️ Resend test mode restriction: Forwarding email intended for ${to} to owner ${ownerEmail}`);
+                    const retryResponse = await resend.emails.send({
+                        from: sender,
+                        to: [ownerEmail],
+                        subject: `[LeadFlow Outreach to ${to}] ${subject}`,
+                        html: `<div style="padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:15px;border-radius:8px;font-family:sans-serif;font-size:12px;color:#166534;">
+                                <strong>LeadFlow Test Mode Dispatch</strong><br/>
+                                Originally addressed to recipient: <code>${to}</code><br/>
+                                <span style="font-size:11px;color:#15803d;">(Delivered to verified owner email via Resend API Free Tier)</span>
+                               </div>` + html
+                    });
+
+                    if (!retryResponse.error) {
+                        console.log(`✅ Resend Test Mode email delivered to ${ownerEmail} (ID: ${retryResponse.data?.id})`);
+                        return { messageId: retryResponse.data?.id, provider: "Resend HTTPS API (Test Mode Owner Dispatch)" };
+                    }
+                }
                 throw new Error(response.error.message);
             }
 
