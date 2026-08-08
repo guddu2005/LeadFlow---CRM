@@ -400,6 +400,7 @@ const convertProspectToLead = async (prospectId, user) => {
         status: "Not Contacted",
         notes: prospect.notes || "",
         signal: prospect.signal || "",
+        assignedTo: prospect.assignedTo || userId,
         isConvertedToCompany: false,
         createdBy: userId,
         updatedBy: userId
