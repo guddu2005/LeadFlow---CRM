@@ -26,9 +26,113 @@ import {
     TrendingUp,
     ChevronLeft,
     ChevronRight,
+    FileText,
+    Copy,
+    Check,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
+
+const defaultTemplates = [
+    {
+        _id: "tmp_1",
+        name: "Cold Intro — PropTech Value Prop",
+        channel: "Email",
+        category: "Cold Outreach",
+        subject: "Quick question regarding {{companyName}}'s lead pipeline",
+        message: "Hi {{contactName}},\n\nI noticed {{companyName}} is actively expanding property operations. We built LeadFlow CRM to automate lead capture, instant email follow-ups, and calendar bookings with 0 manual effort.\n\nWould you be open to a quick 10-minute demo this Thursday?\n\nBest regards,\nLeadFlow Team",
+    },
+    {
+        _id: "tmp_2",
+        name: "Research Study Invitation",
+        channel: "Email",
+        category: "Research",
+        subject: "Invitation to join LeadFlow UK Property Research Study",
+        message: "Hi {{contactName}},\n\nWe are conducting a benchmark research study on commercial real estate lead conversion rates across the UK.\n\nWe would love to feature {{companyName}}'s insights in our Q3 PropTech Index report. In return, we'll provide full access to our private benchmarking data.\n\nAre you available for a brief 15-minute discovery call next week?",
+    },
+    {
+        _id: "tmp_3",
+        name: "Follow-Up 1 — 24h Bump",
+        channel: "Email",
+        category: "Follow-up",
+        subject: "Re: {{companyName}} lead conversion scaling",
+        message: "Hi {{contactName}},\n\nFollowing up on my previous note. Wanted to see if you had 5 minutes to review how LeadFlow helps teams like {{companyName}} boost lead conversion by 34%.\n\nLet me know if tomorrow works for a quick chat!",
+    },
+    {
+        _id: "tmp_4",
+        name: "LinkedIn Connection Note",
+        channel: "LinkedIn",
+        category: "Social",
+        subject: "LinkedIn Connection Request",
+        message: "Hi {{contactName}}, impressed by your work at {{companyName}}! Would love to connect and share some insights on automating property pipeline workflows.",
+    },
+    {
+        _id: "tmp_5",
+        name: "Phone Discovery Script",
+        channel: "Phone",
+        category: "Direct Call",
+        subject: "Phone Discovery Script — {{companyName}}",
+        message: "Key Speaking Points:\n1. Greet {{contactName}} and introduce LeadFlow CRM.\n2. Ask about current CRM software & lead response time.\n3. Offer 15-minute live demo.",
+    }
+];
+
+const defaultSampleOutreach = [
+    {
+        _id: "out_101",
+        channel: "Email",
+        sequenceType: "Initial",
+        status: "Sent",
+        subject: "Quick question regarding Savills UK's lead pipeline",
+        message: "Hi Richard, I noticed Savills UK is actively expanding property operations. We built LeadFlow CRM to automate lead capture and instant follow-ups.",
+        scheduledAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+        prospect: { companyName: "Savills UK", contactName: "Richard Ellis", email: "r.ellis@savills.co.uk" },
+        outcome: "Opened",
+    },
+    {
+        _id: "out_102",
+        channel: "LinkedIn",
+        sequenceType: "Initial",
+        status: "Replied",
+        subject: "LinkedIn Connection Note — Knight Frank",
+        message: "Hi Sarah, impressed by your work at Knight Frank! Would love to connect and share insights on automating property workflows.",
+        scheduledAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+        prospect: { companyName: "Knight Frank", contactName: "Sarah Jenkins", email: "sarah.j@knightfrank.com" },
+        outcome: "Booked Demo",
+    },
+    {
+        _id: "out_103",
+        channel: "Email",
+        sequenceType: "Follow Up 1",
+        status: "Scheduled",
+        subject: "Re: CBRE Group lead conversion scaling",
+        message: "Hi Mark, following up on my previous note. Wanted to see if you had 5 minutes to review how LeadFlow helps teams like CBRE Group.",
+        scheduledAt: new Date(Date.now() + 3600000 * 12).toISOString(),
+        prospect: { companyName: "CBRE Group", contactName: "Mark Thompson", email: "mark.t@cbre.com" },
+        outcome: "Pending",
+    },
+    {
+        _id: "out_104",
+        channel: "Phone",
+        sequenceType: "Initial",
+        status: "Sent",
+        subject: "Phone Discovery Call — JLL International",
+        message: "Spoke with David Miller. Interested in automated lead triggers. Demo scheduled for Thursday.",
+        scheduledAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+        prospect: { companyName: "JLL International", contactName: "David Miller", email: "david.m@jll.com" },
+        outcome: "Converted",
+    },
+    {
+        _id: "out_105",
+        channel: "Email",
+        sequenceType: "Initial",
+        status: "Draft",
+        subject: "PropTech Automation for Chestertons",
+        message: "Hi Emma, exploring how Chestertons streamlines tenant inquiries and automated CRM tracking.",
+        scheduledAt: new Date(Date.now() + 3600000 * 36).toISOString(),
+        prospect: { companyName: "Chestertons", contactName: "Emma Watson", email: "e.watson@chestertons.com" },
+        outcome: "Drafting",
+    }
+];
 
 export default function OutreachPage() {
     const [outreachs, setOutreachs] = useState([]);
@@ -42,10 +146,12 @@ export default function OutreachPage() {
 
     // Modal state
     const [showModal, setShowModal] = useState(false);
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [editingOutreach, setEditingOutreach] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [prospectsList, setProspectsList] = useState([]);
-    const [templatesList, setTemplatesList] = useState([]);
+    const [templatesList, setTemplatesList] = useState(defaultTemplates);
+    const [copiedId, setCopiedId] = useState(null);
 
     const [formData, setFormData] = useState({
         prospect: "",
@@ -76,16 +182,15 @@ export default function OutreachPage() {
 
             if (listRes.status === "fulfilled") {
                 const dataObj = listRes.value.data?.data || listRes.value.data?.message;
-                if (dataObj && Array.isArray(dataObj.outreachs)) {
-                    setOutreachs(dataObj.outreachs);
+                const list = Array.isArray(dataObj?.outreachs) ? dataObj.outreachs : Array.isArray(dataObj) ? dataObj : [];
+                if (list.length > 0) {
+                    setOutreachs(list);
                     setTotalPages(dataObj.pagination?.totalPages || 1);
-                } else if (Array.isArray(dataObj)) {
-                    setOutreachs(dataObj);
                 } else {
-                    setOutreachs([]);
+                    setOutreachs(defaultSampleOutreach);
                 }
             } else {
-                setOutreachs([]);
+                setOutreachs(defaultSampleOutreach);
             }
 
             if (statsRes.status === "fulfilled") {
@@ -94,17 +199,21 @@ export default function OutreachPage() {
 
             if (prospectsRes.status === "fulfilled") {
                 const pros = prospectsRes.value.data?.data?.prospects || prospectsRes.value.data?.data || [];
-                if (Array.isArray(pros)) setProspectsList(pros);
+                if (Array.isArray(pros) && pros.length > 0) setProspectsList(pros);
             }
 
             if (templatesRes.status === "fulfilled") {
                 const tmps = templatesRes.value.data?.data?.templates || templatesRes.value.data?.data || [];
-                if (Array.isArray(tmps)) setTemplatesList(tmps);
+                if (Array.isArray(tmps) && tmps.length > 0) {
+                    setTemplatesList(tmps);
+                } else {
+                    setTemplatesList(defaultTemplates);
+                }
             }
 
         } catch (err) {
             console.error("Outreach fetch error:", err);
-            setOutreachs(mockOutreachs);
+            setOutreachs(defaultSampleOutreach);
         } finally {
             setLoading(false);
         }
@@ -267,6 +376,14 @@ export default function OutreachPage() {
 
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                        onClick={() => setShowTemplateModal(true)}
+                        className="px-3.5 py-2 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/40 hover:bg-purple-100/50 text-xs font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                    >
+                        <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span>Template Library ({templatesList.length})</span>
+                    </button>
+
                     <button
                         onClick={handleExportCSV}
                         className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-all cursor-pointer shadow-sm"
@@ -522,13 +639,67 @@ export default function OutreachPage() {
                         </div>
 
                         <form onSubmit={handleSaveOutreach} className="p-6 space-y-4 overflow-y-auto flex-1">
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Select Target Prospect *</label>
+                                <select
+                                    required
+                                    value={formData.prospect}
+                                    onChange={(e) => setFormData({ ...formData, prospect: e.target.value })}
+                                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
+                                >
+                                    {prospectsList.length === 0 ? (
+                                        <option value="">No prospects available (Create prospect first)</option>
+                                    ) : (
+                                        prospectsList.map((p) => (
+                                            <option key={p._id} value={p._id}>
+                                                {p.companyName || p.contactName || "Prospect"} ({p.email || "No Email"})
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Select High-Converting Message Template</span>
+                                </label>
+                                <select
+                                    value={formData.template}
+                                    onChange={(e) => {
+                                        const selectedId = e.target.value;
+                                        const selected = templatesList.find((t) => t._id === selectedId);
+                                        if (selected) {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                template: selectedId,
+                                                subject: selected.subject || prev.subject,
+                                                message: selected.message || prev.message,
+                                                channel: selected.channel || prev.channel,
+                                            }));
+                                            toast.success(`Template "${selected.name}" applied! ✨`);
+                                        } else {
+                                            setFormData((prev) => ({ ...prev, template: "" }));
+                                        }
+                                    }}
+                                    className="w-full px-3 py-2 rounded-xl bg-purple-50/60 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs font-semibold text-slate-900 dark:text-white cursor-pointer"
+                                >
+                                    <option value="">-- Custom Message (No Template) --</option>
+                                    {templatesList.map((t) => (
+                                        <option key={t._id} value={t._id}>
+                                            {t.name} ({t.category || t.channel})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Channel *</label>
                                     <select
                                         value={formData.channel}
                                         onChange={(e) => setFormData({ ...formData, channel: e.target.value })}
-                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs cursor-pointer"
                                     >
                                         <option value="Email">Email</option>
                                         <option value="LinkedIn">LinkedIn</option>
@@ -540,7 +711,7 @@ export default function OutreachPage() {
                                     <select
                                         value={formData.sequenceType}
                                         onChange={(e) => setFormData({ ...formData, sequenceType: e.target.value })}
-                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs cursor-pointer"
                                     >
                                         <option value="Initial">Initial</option>
                                         <option value="Follow Up 1">Follow Up 1</option>
@@ -556,18 +727,18 @@ export default function OutreachPage() {
                                     placeholder="e.g. Helping Savills Generate More Qualified Leads"
                                     value={formData.subject}
                                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Message Body</label>
                                 <textarea
-                                    rows={4}
+                                    rows={5}
                                     placeholder="Type your outreach message content..."
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-sans"
                                 />
                             </div>
 
@@ -577,7 +748,7 @@ export default function OutreachPage() {
                                     <select
                                         value={formData.status}
                                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs cursor-pointer"
                                     >
                                         <option value="Draft">Draft</option>
                                         <option value="Scheduled">Scheduled</option>
@@ -587,12 +758,90 @@ export default function OutreachPage() {
                             </div>
 
                             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
-                                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border text-xs">Cancel</button>
-                                <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold">
-                                    {isSubmitting ? "Launching..." : "Save Sequence"}
+                                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">Cancel</button>
+                                <button type="submit" disabled={isSubmitting} className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md">
+                                    {isSubmitting ? "Launching..." : "Launch Sequence ✉️"}
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* TEMPLATES GALLERY MODAL */}
+            {showTemplateModal && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-3xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+                        <div className="p-5 bg-purple-50/50 dark:bg-purple-950/40 border-b border-purple-200 dark:border-purple-800 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                    Message Templates Library ({templatesList.length})
+                                </h3>
+                            </div>
+                            <button onClick={() => setShowTemplateModal(false)} className="text-slate-400 hover:text-slate-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {templatesList.map((tmp) => (
+                                    <div key={tmp._id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3 flex flex-col justify-between">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <h4 className="font-bold text-xs text-slate-900 dark:text-white">{tmp.name}</h4>
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                                                    {tmp.channel || "Email"}
+                                                </span>
+                                            </div>
+                                            {tmp.subject && (
+                                                <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                                    Subject: {tmp.subject}
+                                                </p>
+                                            )}
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 whitespace-pre-line line-clamp-4 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                {tmp.message || tmp.body}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(`${tmp.subject ? tmp.subject + "\n\n" : ""}${tmp.message || tmp.body}`);
+                                                    setCopiedId(tmp._id);
+                                                    toast.success("Template copied to clipboard! 📋");
+                                                    setTimeout(() => setCopiedId(null), 2000);
+                                                }}
+                                                className="text-[11px] text-slate-500 hover:text-slate-700 flex items-center gap-1 font-semibold"
+                                            >
+                                                {copiedId === tmp._id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                                <span>{copiedId === tmp._id ? "Copied!" : "Copy"}</span>
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        template: tmp._id,
+                                                        subject: tmp.subject || prev.subject,
+                                                        message: tmp.message || tmp.body || prev.message,
+                                                        channel: tmp.channel || prev.channel,
+                                                    }));
+                                                    setShowTemplateModal(false);
+                                                    setShowModal(true);
+                                                    toast.success(`Loaded template: "${tmp.name}" ✨`);
+                                                }}
+                                                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold shadow flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <Sparkles className="w-3.5 h-3.5" />
+                                                <span>Use Template</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
