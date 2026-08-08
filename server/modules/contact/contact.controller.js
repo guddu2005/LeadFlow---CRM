@@ -175,7 +175,7 @@ exports.restoreContact = asyncHandler(async(req,res)=>{
 
 // Get All Contacts
 exports.getAllContacts = asyncHandler(async(req,res)=>{
-    const result = await contactService.getAllContacts(req.query);
+    const result = await contactService.getAllContacts(req.query, req.user);
     res.status(200).json(
         new ApiResponse(
             200,

@@ -338,7 +338,7 @@ const restoreContact = async(id)=>{
 
 
 // Get all contacts
-const getAllContacts = async (query) => {
+const getAllContacts = async (query, user) => {
     const { page = 1, limit = 10, search } = query;
     const filter = { isDeleted: false };
     if (search) {
@@ -349,9 +349,28 @@ const getAllContacts = async (query) => {
             { jobTitle: { $regex: search, $options: "i" } }
         ];
     }
+
+    const userRole = (user?.role || "").toLowerCase();
+    if (user && userRole !== "admin" && userRole !== "manager") {
+        const rbacOr = [
+            { assignedTo: user._id },
+            { createdBy: user._id }
+        ];
+        if (!filter.$or) {
+            filter.$or = rbacOr;
+        } else {
+            filter.$and = [
+                { $or: filter.$or },
+                { $or: rbacOr }
+            ];
+            delete filter.$or;
+        }
+    }
+
     const skip = (Number(page) - 1) * Number(limit);
     const contacts = await Contact.find(filter)
         .populate("company", "companyName website")
+        .populate("assignedTo", "firstName lastName email role")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit));

@@ -83,12 +83,15 @@ const getLeads = async (query, user) => {
     if (source) filter.source = source;
     if (assignedTo) filter.assignedTo = assignedTo;
 
-    // RBAC: Researcher role sees leads assigned to them OR created by them
-    if (user && user.role && user.role.toLowerCase() === "researcher") {
-        filter.$or = [
-            { assignedTo: user._id },
-            { createdBy: user._id }
-        ];
+    // RBAC: Non-admin and non-manager roles see leads assigned to them OR created by them
+    const userRole = (user?.role || "").toLowerCase();
+    if (user && userRole !== "admin" && userRole !== "manager") {
+        if (!assignedTo) {
+            filter.$or = [
+                { assignedTo: user._id },
+                { createdBy: user._id }
+            ];
+        }
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -258,6 +261,16 @@ const updateLead = async (id, leadData, user) => {
     lead.updatedBy = userId;
 
     await lead.save();
+
+    if (leadData.assignedTo) {
+        if (lead.company) {
+            await Company.findByIdAndUpdate(lead.company, { assignedTo: leadData.assignedTo });
+        }
+        if (lead.contact) {
+            await Contact.findByIdAndUpdate(lead.contact, { assignedTo: leadData.assignedTo });
+        }
+    }
+
     return await getLeadById(lead._id);
 };
 
@@ -395,8 +408,14 @@ const assignLead = async (
     }
 
     lead.assignedTo = assignedTo;
-
     await lead.save();
+
+    if (lead.company) {
+        await Company.findByIdAndUpdate(lead.company, { assignedTo });
+    }
+    if (lead.contact) {
+        await Contact.findByIdAndUpdate(lead.contact, { assignedTo });
+    }
 
     await LeadAssignmentHistory.create({
         lead: leadId,

@@ -92,20 +92,23 @@ const getCompanies = async (query) => {
     if (companyType) filter.companyType = companyType;
     if (assignedTo) filter.assignedTo = assignedTo;
 
-    // RBAC: Researcher role sees companies assigned to them OR created by them
-    if (user && user.role && user.role.toLowerCase() === "researcher") {
-        const rbacOr = [
-            { assignedTo: user._id },
-            { createdBy: user._id }
-        ];
-        if (!filter.$or) {
-            filter.$or = rbacOr;
-        } else {
-            filter.$and = [
-                { $or: filter.$or },
-                { $or: rbacOr }
+    // RBAC: Non-admin and non-manager roles see companies assigned to them OR created by them
+    const userRole = (user?.role || "").toLowerCase();
+    if (user && userRole !== "admin" && userRole !== "manager") {
+        if (!assignedTo) {
+            const rbacOr = [
+                { assignedTo: user._id },
+                { createdBy: user._id }
             ];
-            delete filter.$or;
+            if (!filter.$or) {
+                filter.$or = rbacOr;
+            } else {
+                filter.$and = [
+                    { $or: filter.$or },
+                    { $or: rbacOr }
+                ];
+                delete filter.$or;
+            }
         }
     }
 

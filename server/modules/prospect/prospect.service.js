@@ -367,9 +367,15 @@ const convertProspectToLead = async (prospectId, user) => {
             country: prospect.location?.country || "",
             city: prospect.location?.city || "",
             employeeCount: prospect.employeeCount || 0,
+            assignedTo: prospect.assignedTo || userId,
             createdBy: userId,
             updatedBy: userId
         });
+    } else {
+        if (!company.assignedTo && prospect.assignedTo) {
+            company.assignedTo = prospect.assignedTo;
+            await company.save();
+        }
     }
 
     // 2. Parse contact name safely and create Contact with company reference
@@ -386,6 +392,7 @@ const convertProspectToLead = async (prospectId, user) => {
         phone: prospect.phone || "",
         jobTitle: prospect.jobTitle || "",
         isPrimary: true,
+        assignedTo: prospect.assignedTo || userId,
         createdBy: userId,
         updatedBy: userId
     });
