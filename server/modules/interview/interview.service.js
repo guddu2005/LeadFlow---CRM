@@ -81,15 +81,16 @@ const scheduleInterview = async (data, userId) => {
         hour: "2-digit",
         minute: "2-digit"
     });
-    const candidateFullName = `${lead.contact.firstName || "Contact"} ${lead.contact.lastName || ""}`.trim();
+    const candidateFullName = `${lead.contact?.firstName || data.candidateName || "Contact"} ${lead.contact?.lastName || ""}`.trim();
     const leadCompanyName = lead.companyName || lead.company?.companyName || "PropScale Management UK";
+    const candidateEmail = data.candidateEmail || data.email || lead.contact?.email;
 
     // Fire-and-forget background email & notification dispatches (degraded to setImmediate for 0ms blocking)
     setImmediate(async () => {
         try {
-            if (lead.contact?.email) {
+            if (candidateEmail) {
                 await emailService.sendInterviewConfirmation({
-                    to: lead.contact.email,
+                    to: candidateEmail,
                     name: candidateFullName,
                     date: dateStr,
                     time: timeStr,

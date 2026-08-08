@@ -20,7 +20,6 @@ const createNotification = async (data) => {
         if (data.user) {
             io.to(data.user.toString()).emit("newNotification", notification);
         }
-        io.emit("newNotification", notification);
     } catch(error) {
         console.log("Socket notification emit error:", error.message);
     }

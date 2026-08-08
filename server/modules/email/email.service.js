@@ -10,12 +10,24 @@ const {
 } = require("./email.template");
 
 const sendEmail = async ({ to, subject, html }) => {
-    return await transporter.sendMail({
-        from: `"LeadFlow CRM" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html
-    });
+    if (!to) {
+        console.warn("⚠️ sendEmail warning: Recipient 'to' address is missing");
+        return false;
+    }
+    const senderEmail = (process.env.EMAIL_USER || "gudducse2005@gmail.com").trim();
+    try {
+        const info = await transporter.sendMail({
+            from: `"LeadFlow CRM" <${senderEmail}>`,
+            to,
+            subject,
+            html
+        });
+        console.log(`✅ Email sent successfully to ${to} (Message ID: ${info.messageId})`);
+        return info;
+    } catch (err) {
+        console.error(`❌ Failed to send email to ${to}:`, err.message);
+        throw err;
+    }
 };
 
 const sendWelcomeEmail = async (user) => {
