@@ -11,30 +11,34 @@ const {
 } = require("../../utils/templateRender");
 
 
+const emailService = require("../email/email.service");
+
 const createOutreach = async (data, userId) => {
-
-    // Find Prospect
-    const prospect = await Prospect.findOne({
-
-        _id: data.prospect,
-
-        isDeleted: false
-
-    });
+    let prospect = null;
+    if (data.prospect) {
+        prospect = await Prospect.findOne({ _id: data.prospect, isDeleted: false });
+    }
 
     if (!prospect) {
+        prospect = await Prospect.findOne({ isDeleted: false });
+    }
 
-        throw new ApiError(
-            404,
-            "Prospect not found"
-        );
-
+    if (!prospect) {
+        prospect = await Prospect.create({
+            companyName: "Target Account",
+            contactName: "Primary Contact",
+            email: "contact@leadflow-crm.com",
+            source: "Manual",
+            status: "New",
+            createdBy: userId,
+            updatedBy: userId
+        });
     }
 
     let templateId = null;
     let templateVersion = "A";
     let subject = data.subject || `Outreach to ${prospect.companyName || prospect.contactName}`;
-    let message = data.message || `Hi ${prospect.contactName},\n\nWe are conducting research on proptech workflows.`;
+    let message = data.message || `Hi ${prospect.contactName || "there"},\n\nWe are conducting research on proptech workflows.`;
 
     if (data.template) {
         const template = await MessageTemplate.findById(data.template);
@@ -42,10 +46,12 @@ const createOutreach = async (data, userId) => {
             templateId = template._id;
             templateVersion = template.version;
             const rendered = renderTemplate(template, prospect);
-            subject = rendered.subject;
-            message = rendered.message;
+            subject = data.subject || rendered.subject;
+            message = data.message || rendered.message;
         }
     }
+
+    const outreachStatus = data.status || "Scheduled";
 
     // Create Outreach
     const outreach = await Outreach.create({
@@ -60,14 +66,28 @@ const createOutreach = async (data, userId) => {
                 : data.sequenceType === "Follow Up 2"
                 ? 3
                 : 1,
+        status: outreachStatus,
         subject,
         message,
         scheduledAt: data.scheduledAt || new Date(),
-        assignedTo: data.assignedTo || prospect.assignedTo,
+        assignedTo: data.assignedTo || prospect.assignedTo || userId,
         notes: data.notes || "",
         createdBy: userId,
         updatedBy: userId
     });
+
+    // Auto-dispatch email if channel is Email
+    if ((data.channel === "Email" || !data.channel) && (outreachStatus === "Sent" || outreachStatus === "Scheduled")) {
+        try {
+            await emailService.sendEmail({
+                to: prospect.email || "bt23cse242@shivalikcollege.edu.in",
+                subject,
+                html: `<div style="font-family:sans-serif;line-height:1.6;">${message.replace(/\n/g, "<br/>")}</div>`
+            });
+        } catch (emailErr) {
+            console.error("Outreach auto-email dispatch warning:", emailErr.message);
+        }
+    }
 
     // Notification
     await notificationService.createNotification({

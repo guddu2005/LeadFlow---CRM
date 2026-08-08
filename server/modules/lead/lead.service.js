@@ -10,53 +10,57 @@ const notificationService = require("../notification/notification.service");
 
 
 const createLead = async (leadData, userId) => {
+    let companyId = leadData.company;
+    let contactId = leadData.contact;
 
-    // Check Company
-    const company = await Company.findOne({
-        _id: leadData.company,
-        isDeleted: false
-    });
-
-    if (!company) {
-        throw new ApiError(404, "Company not found");
+    if (!companyId && leadData.companyName) {
+        let comp = await Company.findOne({ companyName: leadData.companyName, isDeleted: false });
+        if (!comp) {
+            comp = await Company.create({
+                companyName: leadData.companyName,
+                website: leadData.website || "",
+                assignedTo: leadData.assignedTo || userId,
+                createdBy: userId,
+                updatedBy: userId
+            });
+        }
+        companyId = comp._id;
     }
 
-    // Check Contact
-    const contact = await Contact.findOne({
-        _id: leadData.contact,
-        company: leadData.company,
-        isDeleted: false
-    });
-
-    if (!contact) {
-        throw new ApiError(
-            404,
-            "Contact not found for this company"
-        );
-    }
-
-    // Prevent duplicate lead
-    const existingLead = await Lead.findOne({
-        company: leadData.company,
-        contact: leadData.contact,
-        isDeleted: false
-    });
-
-    if (existingLead) {
-        throw new ApiError(
-            409,
-            "Lead already exists for this contact"
-        );
+    if (!contactId && (leadData.contactFirstName || leadData.email)) {
+        let cont = await Contact.findOne({
+            $or: [
+                { email: leadData.email || "noemail@leadflow.com" },
+                { firstName: leadData.contactFirstName, company: companyId }
+            ],
+            isDeleted: false
+        });
+        if (!cont) {
+            cont = await Contact.create({
+                firstName: leadData.contactFirstName || "Primary",
+                lastName: leadData.contactLastName || "Contact",
+                email: leadData.email || `contact_${Date.now()}@leadflow-crm.com`,
+                phone: leadData.phone || "",
+                jobTitle: leadData.jobTitle || "Executive",
+                company: companyId,
+                createdBy: userId,
+                updatedBy: userId
+            });
+        }
+        contactId = cont._id;
     }
 
     return await Lead.create({
         ...leadData,
+        company: companyId,
+        contact: contactId,
+        assignedTo: leadData.assignedTo || userId,
         createdBy: userId,
         updatedBy: userId
     });
 };
 
-const getLeads = async (query) => {
+const getLeads = async (query, user) => {
 
     const {
         page = 1,
@@ -78,6 +82,14 @@ const getLeads = async (query) => {
     if (priority) filter.priority = priority;
     if (source) filter.source = source;
     if (assignedTo) filter.assignedTo = assignedTo;
+
+    // RBAC: Researcher role sees leads assigned to them OR created by them
+    if (user && user.role && user.role.toLowerCase() === "researcher") {
+        filter.$or = [
+            { assignedTo: user._id },
+            { createdBy: user._id }
+        ];
+    }
 
     const skip = (Number(page) - 1) * Number(limit);
 

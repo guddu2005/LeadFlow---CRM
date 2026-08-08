@@ -92,6 +92,23 @@ const getCompanies = async (query) => {
     if (companyType) filter.companyType = companyType;
     if (assignedTo) filter.assignedTo = assignedTo;
 
+    // RBAC: Researcher role sees companies assigned to them OR created by them
+    if (user && user.role && user.role.toLowerCase() === "researcher") {
+        const rbacOr = [
+            { assignedTo: user._id },
+            { createdBy: user._id }
+        ];
+        if (!filter.$or) {
+            filter.$or = rbacOr;
+        } else {
+            filter.$and = [
+                { $or: filter.$or },
+                { $or: rbacOr }
+            ];
+            delete filter.$or;
+        }
+    }
+
     const skip = (Number(page) - 1) * Number(limit);
 
     const companies = await Company.find(filter)

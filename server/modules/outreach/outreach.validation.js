@@ -1,12 +1,13 @@
 const Joi = require("joi");
 
 const createOutreachValidation = Joi.object({
-
     prospect: Joi.string()
-        .required(),
+        .allow("", null)
+        .optional(),
 
     template: Joi.string()
-        .required(),
+        .allow("", null)
+        .optional(),
 
     channel: Joi.string()
         .valid(
@@ -14,14 +15,25 @@ const createOutreachValidation = Joi.object({
             "Email",
             "Phone"
         )
-        .required(),
+        .optional(),
 
     sequenceType: Joi.string()
-        .valid(
-            "Initial",
-            "Follow Up 1",
-            "Follow Up 2"
-        )
+        .allow("", null)
+        .optional(),
+
+    sequenceStep: Joi.number()
+        .optional(),
+
+    status: Joi.string()
+        .allow("", null)
+        .optional(),
+
+    subject: Joi.string()
+        .allow("", null)
+        .optional(),
+
+    message: Joi.string()
+        .allow("", null)
         .optional(),
 
     scheduledAt: Joi.date()
@@ -33,12 +45,12 @@ const createOutreachValidation = Joi.object({
         .optional(),
 
     assignedTo: Joi.string()
+        .allow("", null)
         .optional(),
 
     notes: Joi.string()
-        .allow("")
+        .allow("", null)
         .optional()
-
 });
 
 const updateOutreachValidation = Joi.object({

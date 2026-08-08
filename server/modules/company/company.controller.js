@@ -20,7 +20,7 @@ exports.createCompany = asyncHandler(async (req, res) => {
 
 exports.getCompanies = asyncHandler(async (req, res) => {
 
-    const companies = await companyService.getCompanies(req.query);
+    const companies = await companyService.getCompanies(req.query, req.user);
 
     res.status(200).json(
         new ApiResponse(

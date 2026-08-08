@@ -21,9 +21,9 @@ exports.createLead = asyncHandler(async (req, res) => {
 
 // Get All Leads
 exports.getLeads = asyncHandler(async (req, res) => {
-
     const leads = await leadService.getLeads(
-        req.query
+        req.query,
+        req.user
     );
 
     res.status(200).json(
