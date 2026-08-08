@@ -36,8 +36,18 @@ export default function ProspectsPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [usersList, setUsersList] = useState([]);
 
-    // Current Logged In User
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    // Current Logged In User (safely check leadflow_user or user key)
+    const getCurrentUserSafe = () => {
+        try {
+            const item = localStorage.getItem("leadflow_user") || localStorage.getItem("user");
+            if (!item || item === "undefined" || item === "null") return {};
+            return JSON.parse(item);
+        } catch (e) {
+            return {};
+        }
+    };
+
+    const currentUser = getCurrentUserSafe();
     const userRole = (currentUser.role || "").toLowerCase();
     const isAdminOrManager = userRole === "admin" || userRole === "manager";
 

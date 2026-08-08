@@ -4,16 +4,16 @@ const ApiResponse = require("../../utils/ApiResponse");
 const emailService = require("./email.service");
 
 exports.sendTestEmail = asyncHandler(async (req, res) => {
-
-    await emailService.sendTestEmail(req.body.email);
+    const targetEmail = req.body?.email || req.query?.email || "gudducse2005@gmail.com";
+    const info = await emailService.sendTestEmail(targetEmail);
 
     res.status(200).json(
         new ApiResponse(
             200,
-            "Test email sent successfully"
+            `Test email sent successfully to ${targetEmail}`,
+            { messageId: info?.messageId }
         )
     );
-
 });
 
 exports.sendCustomEmail = asyncHandler(async (req, res) => {

@@ -61,6 +61,28 @@ app.get(["/health", "/api/health"], (req, res) => {
     });
 });
 
+// Live Email Subsystem Diagnostic Endpoint
+app.get("/api/test-email", async (req, res) => {
+    const targetEmail = req.query.to || "gudducse2005@gmail.com";
+    try {
+        const emailService = require("./modules/email/email.service");
+        const info = await emailService.sendTestEmail(targetEmail);
+        res.status(200).json({
+            success: true,
+            message: `🎉 Email successfully delivered to ${targetEmail}!`,
+            messageId: info?.messageId || "Sent",
+            envUser: process.env.EMAIL_USER ? "Configured ✅" : "MISSING ❌"
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "❌ Live SMTP Email Delivery Failed",
+            error: err.message,
+            envUser: process.env.EMAIL_USER ? "Configured ✅" : "MISSING ❌"
+        });
+    }
+});
+
 
 // routes
 app.use("/api/auth", authRoutes);

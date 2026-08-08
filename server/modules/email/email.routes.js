@@ -16,6 +16,11 @@ const {
     customEmailSchema
 } = require("./email.validation");
 
+router.get(
+    "/test",
+    emailController.sendTestEmail
+);
+
 router.post(
     "/test",
     protect,
