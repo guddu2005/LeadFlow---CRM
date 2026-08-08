@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockLeads from "../../utils/mock-data/leads";
+
 import {
     Briefcase,
     Building2,
@@ -87,10 +87,10 @@ export default function LeadsPage() {
                 } else if (Array.isArray(dataObj)) {
                     setLeads(dataObj);
                 } else {
-                    setLeads(mockLeads);
+                    setLeads([]);
                 }
             } else {
-                setLeads(mockLeads);
+                setLeads([]);
             }
 
             if (statsRes.status === "fulfilled") {

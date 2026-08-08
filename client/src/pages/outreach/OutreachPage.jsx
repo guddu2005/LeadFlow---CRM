@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockOutreachs from "../../utils/mock-data/outreachs";
+
 import {
     Send,
     Mail,
@@ -82,10 +82,10 @@ export default function OutreachPage() {
                 } else if (Array.isArray(dataObj)) {
                     setOutreachs(dataObj);
                 } else {
-                    setOutreachs(mockOutreachs);
+                    setOutreachs([]);
                 }
             } else {
-                setOutreachs(mockOutreachs);
+                setOutreachs([]);
             }
 
             if (statsRes.status === "fulfilled") {
@@ -286,20 +286,34 @@ export default function OutreachPage() {
             </div>
 
             {/* Outreach Telemetry Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                {[
-                    { title: "Total Outreachs", value: stats?.overview?.totalOutreachs || outreachs.length, icon: Send, color: "text-blue-600 dark:text-blue-400" },
-                    { title: "Messages Sent", value: stats?.overview?.sent || outreachs.filter(o => o.status === "Sent" || o.status === "Delivered" || o.sentAt).length, icon: CheckCircle2, color: "text-indigo-600 dark:text-indigo-400" },
-                    { title: "Open Rate", value: `${stats?.overview?.openRate || 68.4}%`, icon: TrendingUp, color: "text-purple-600 dark:text-purple-400" },
-                    { title: "Reply Rate", value: `${stats?.overview?.replyRate || 34.2}%`, icon: MessageSquare, color: "text-amber-500" },
-                    { title: "Booking Rate", value: `${stats?.overview?.bookingRate || 18.5}%`, icon: Calendar, color: "text-emerald-600 dark:text-emerald-400" },
-                ].map((st, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{st.title}</span>
-                        <div className={`text-2xl font-extrabold ${st.color}`}>{st.value}</div>
+            {(() => {
+                const totalCount = outreachs.length;
+                const sentCount = stats?.overview?.sent !== undefined ? stats.overview.sent : outreachs.filter(o => o.status === "Sent" || o.status === "Delivered" || o.sentAt).length;
+                const openedCount = outreachs.filter(o => o.status === "Opened" || o.status === "Replied" || o.status === "Booked").length;
+                const repliedCount = outreachs.filter(o => o.status === "Replied" || o.status === "Booked").length;
+                const bookedCount = outreachs.filter(o => o.status === "Booked").length;
+
+                const openRate = stats?.overview?.openRate !== undefined ? stats.overview.openRate : (totalCount > 0 ? Math.round((openedCount / totalCount) * 100) : 0);
+                const replyRate = stats?.overview?.replyRate !== undefined ? stats.overview.replyRate : (totalCount > 0 ? Math.round((repliedCount / totalCount) * 100) : 0);
+                const bookingRate = stats?.overview?.bookingRate !== undefined ? stats.overview.bookingRate : (totalCount > 0 ? Math.round((bookedCount / totalCount) * 100) : 0);
+
+                return (
+                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        {[
+                            { title: "Total Outreachs", value: stats?.overview?.totalOutreachs !== undefined ? stats.overview.totalOutreachs : totalCount, icon: Send, color: "text-blue-600 dark:text-blue-400" },
+                            { title: "Messages Sent", value: sentCount, icon: CheckCircle2, color: "text-indigo-600 dark:text-indigo-400" },
+                            { title: "Open Rate", value: `${openRate}%`, icon: TrendingUp, color: "text-purple-600 dark:text-purple-400" },
+                            { title: "Reply Rate", value: `${replyRate}%`, icon: MessageSquare, color: "text-amber-500" },
+                            { title: "Booking Rate", value: `${bookingRate}%`, icon: Calendar, color: "text-emerald-600 dark:text-emerald-400" },
+                        ].map((st, i) => (
+                            <div key={i} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{st.title}</span>
+                                <div className={`text-2xl font-extrabold ${st.color}`}>{st.value}</div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                );
+            })()}
 
             {/* Filter & Channel Selector Bar */}
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">

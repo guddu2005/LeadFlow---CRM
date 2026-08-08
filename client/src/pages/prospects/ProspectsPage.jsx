@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockProspects from "../../utils/mock-data/prospects";
+
 import {
     Target,
     Search,
@@ -74,13 +74,11 @@ export default function ProspectsPage() {
             } else if (Array.isArray(dataObj)) {
                 setProspects(dataObj);
             } else {
-                // Fallback to mock data if DB empty
-                setProspects(mockProspects);
+                setProspects([]);
             }
         } catch (error) {
             console.error("Fetch prospects error:", error);
-            // Fallback gracefully
-            setProspects(mockProspects);
+            setProspects([]);
         } finally {
             setLoading(false);
         }
@@ -710,6 +708,18 @@ export default function ProspectsPage() {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Country</label>
+                                    <input
+                                        type="text"
+                                        value={formData.country}
+                                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Status</label>
                                     <select
                                         value={formData.status}
@@ -722,6 +732,39 @@ export default function ProspectsPage() {
                                         <option value="Booked">Booked</option>
                                         <option value="Declined">Declined</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Buying Signal</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Hiring, Expanding"
+                                        value={formData.signal}
+                                        onChange={(e) => setFormData({ ...formData, signal: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Current Software</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Spreadsheets, Salesforce"
+                                        value={formData.currentSoftware}
+                                        onChange={(e) => setFormData({ ...formData, currentSoftware: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Notes</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Additional prospect context"
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"
+                                    />
                                 </div>
                             </div>
 

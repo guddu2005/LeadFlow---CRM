@@ -8,24 +8,7 @@ export default function NotificationsDropdown() {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    const [notifications, setNotifications] = useState([
-        {
-            _id: "notif-01",
-            title: "New Lead Converted to Company",
-            message: "Savills Real Estate was officially stored in the companies collection.",
-            createdAt: new Date().toISOString(),
-            isRead: false,
-            type: "lead",
-        },
-        {
-            _id: "notif-02",
-            title: "Interview Scheduled",
-            message: "Google Meet link generated for demo interview with Guddu Kumar.",
-            createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
-            isRead: false,
-            type: "interview",
-        },
-    ]);
+    const [notifications, setNotifications] = useState([]);
 
     // Click Outside Listener to Automatically Close Dropdown
     useEffect(() => {
@@ -47,13 +30,21 @@ export default function NotificationsDropdown() {
     // Socket.IO Real-time Connection Setup
     useEffect(() => {
         const token = localStorage.getItem("leadflow_token");
-        const socket = io("http://localhost:5000", {
+        const socketUrl = import.meta.env.VITE_API_URL 
+            ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "")
+            : "https://leadflow-crm-1-kn1w.onrender.com";
+        const socket = io(socketUrl, {
             auth: { token },
-            transports: ["websocket", "polling"],
+            transports: ["polling", "websocket"],
+            reconnectionAttempts: 5,
         });
 
         socket.on("connect", () => {
             console.log("Real-time Socket.IO connected 🟢:", socket.id);
+        });
+
+        socket.on("connect_error", (err) => {
+            console.log("Socket.IO polling fallback info:", err.message);
         });
 
         socket.on("newNotification", (data) => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockInterviews from "../../utils/mock-data/interviews";
+
 import {
     Calendar,
     Video,
@@ -41,10 +41,10 @@ export default function InterviewsPage() {
                 } else if (dataObj?.interviews) {
                     setInterviews(dataObj.interviews);
                 } else {
-                    setInterviews(mockInterviews);
+                    setInterviews([]);
                 }
             } else {
-                setInterviews(mockInterviews);
+                setInterviews([]);
             }
 
             if (statsRes.status === "fulfilled") {
@@ -52,7 +52,7 @@ export default function InterviewsPage() {
             }
         } catch (err) {
             console.error("Fetch interviews error:", err);
-            setInterviews(mockInterviews);
+            setInterviews([]);
         } finally {
             setLoading(false);
         }

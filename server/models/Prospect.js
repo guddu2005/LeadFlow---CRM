@@ -84,7 +84,8 @@ const prospectSchema = new mongoose.Schema(
                 "Contacted",
                 "Replied",
                 "Booked",
-                "Declined"
+                "Declined",
+                "Converted"
             ],
             default: "Not Contacted"
         },

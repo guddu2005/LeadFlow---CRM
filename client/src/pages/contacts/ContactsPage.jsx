@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockContacts from "../../utils/mock-data/contacts";
+
 import {
     Users,
     Mail,
@@ -55,11 +55,11 @@ export default function ContactsPage() {
             } else if (dataObj?.contacts) {
                 setContacts(dataObj.contacts);
             } else {
-                setContacts(mockContacts);
+                setContacts([]);
             }
         } catch (err) {
             console.error("Fetch contacts error:", err);
-            setContacts(mockContacts);
+            setContacts([]);
         } finally {
             setLoading(false);
         }

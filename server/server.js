@@ -51,6 +51,16 @@ app.get("/error", (req, res, next) => {
     next(new ApiError(400, "This is a test error"));
 });
 
+// Health check route for keep-alive pings & uptime monitoring
+app.get(["/health", "/api/health"], (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "LeadFlow CRM API is healthy and awake! 🚀",
+        timestamp: new Date().toISOString(),
+        uptime: Math.floor(process.uptime()),
+    });
+});
+
 
 // routes
 app.use("/api/auth", authRoutes);

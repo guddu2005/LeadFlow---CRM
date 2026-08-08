@@ -315,10 +315,19 @@ const deleteProspect = async (id) => {
 
 };
 
+const mongoose = require("mongoose");
+
 const convertProspectToLead = async (
     prospectId,
     userId
 ) => {
+
+    if (!mongoose.Types.ObjectId.isValid(prospectId)) {
+        throw new ApiError(
+            400,
+            "Invalid Prospect ID format"
+        );
+    }
 
     const prospect = await Prospect.findOne({
         _id: prospectId,
@@ -326,40 +335,59 @@ const convertProspectToLead = async (
     });
 
     if (!prospect) {
-
         throw new ApiError(
             404,
             "Prospect not found"
         );
-
     }
 
-
     if (prospect.converted) {
-
         throw new ApiError(
             400,
             "Prospect already converted"
         );
-
     }
 
+    // 1. Find or create Company for this prospect
+    let company = await Company.findOne({
+        companyName: { $regex: new RegExp(`^${(prospect.companyName || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+        isDeleted: false
+    });
 
-    const nameParts =
-        prospect.contactName.split(" ");
+    if (!company) {
+        company = await Company.create({
+            companyName: prospect.companyName || "Converted Prospect Company",
+            website: prospect.website || "",
+            country: prospect.location?.country || "",
+            city: prospect.location?.city || "",
+            employeeCount: prospect.employeeCount || 0,
+            createdBy: userId,
+            updatedBy: userId
+        });
+    }
+
+    // 2. Parse contact name safely and create Contact with company reference
+    const rawName = (prospect.contactName || "Converted Prospect").trim();
+    const nameParts = rawName.split(" ");
+    const firstName = nameParts[0] || "Converted";
+    const lastName = nameParts.slice(1).join(" ") || "Contact";
 
     const contact = await Contact.create({
-        firstName: nameParts[0],
-        lastName: nameParts.slice(1).join(" ") || "",
-        email: prospect.email,
-        phone: prospect.phone,
-        jobTitle: prospect.jobTitle,
+        company: company._id,
+        firstName,
+        lastName,
+        email: prospect.email || "",
+        phone: prospect.phone || "",
+        jobTitle: prospect.jobTitle || "",
+        isPrimary: true,
         createdBy: userId,
         updatedBy: userId
     });
 
+    // 3. Create Lead linking company and contact
     const lead = await Lead.create({
-        companyName: prospect.companyName,
+        companyName: prospect.companyName || company.companyName,
+        company: company._id,
         website: prospect.website || "",
         contact: contact._id,
         source: prospect.source || "Manual",
@@ -373,26 +401,30 @@ const convertProspectToLead = async (
 
     prospect.converted = true;
     prospect.convertedLead = lead._id;
+    prospect.status = "Converted";
     prospect.convertedAt = new Date();
     prospect.updatedBy = userId;
 
     await prospect.save();
 
-    await notificationService.createNotification({
-        user: userId,
-        type: "PROSPECT_CONVERTED",
-        title: "Prospect Converted to Lead",
-        message: `${prospect.companyName} converted into lead`,
-        referenceId: lead._id,
-        referenceModel: "Lead"
-    });
+    try {
+        await notificationService.createNotification({
+            user: userId,
+            type: "PROSPECT_CONVERTED",
+            title: "Prospect Converted to Lead",
+            message: `${prospect.companyName || "Prospect"} converted into lead`,
+            referenceId: lead._id,
+            referenceModel: "Lead"
+        });
+    } catch (notifErr) {
+        console.error("Notification trigger error during prospect conversion:", notifErr.message);
+    }
 
     return {
+        company,
         contact,
         lead
     };
-
-
 };
 const importProspects = async (
     filePath,

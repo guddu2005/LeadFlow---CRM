@@ -123,11 +123,11 @@ export default function ReportsPage() {
         ]);
 
     const funnelData = [
-        { stage: "Not Contacted", value: 120 },
-        { stage: "Contacted", value: 85 },
-        { stage: "Replied", value: 45 },
-        { stage: "Booked", value: 28 },
-        { stage: "Won", value: 18 },
+        { stage: "Total Prospects", value: stats?.funnel?.prospects || 0 },
+        { stage: "Contacted", value: stats?.funnel?.contacted || 0 },
+        { stage: "Replied", value: stats?.funnel?.replied || 0 },
+        { stage: "Booked", value: stats?.funnel?.booked || 0 },
+        { stage: "Won", value: stats?.funnel?.converted || 0 },
     ];
 
     const COLORS = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#10b981"];
@@ -154,10 +154,10 @@ export default function ReportsPage() {
             {/* Performance Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { title: "Pipeline Value", value: "£1,450,000", color: "text-emerald-600 dark:text-emerald-400" },
-                    { title: "Win Conversion Rate", value: "32.4%", color: "text-blue-600 dark:text-blue-400" },
-                    { title: "Outreach Open Rate", value: "68.2%", color: "text-purple-600 dark:text-purple-400" },
-                    { title: "Meeting Booking Rate", value: "18.5%", color: "text-indigo-600 dark:text-indigo-400" },
+                    { title: "Pipeline Value", value: stats?.overview?.totalValue ? `$${stats.overview.totalValue.toLocaleString()}` : "$0", color: "text-emerald-600 dark:text-emerald-400" },
+                    { title: "Win Conversion Rate", value: stats?.overview?.conversionRate ? `${stats.overview.conversionRate}%` : "0%", color: "text-blue-600 dark:text-blue-400" },
+                    { title: "Outreach Open Rate", value: stats?.outreach?.openRate ? `${stats.outreach.openRate}%` : "0%", color: "text-purple-600 dark:text-purple-400" },
+                    { title: "Meeting Booking Rate", value: stats?.outreach?.bookingRate ? `${stats.outreach.bookingRate}%` : "0%", color: "text-indigo-600 dark:text-indigo-400" },
                 ].map((st, i) => (
                     <div key={i} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{st.title}</span>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
 import LoadingScreen from "../../components/layout/LoadingScreen";
-import mockCompanies from "../../utils/mock-data/companies";
+
 import {
     Building2,
     Globe,
@@ -39,10 +39,10 @@ export default function CompaniesPage() {
                 } else if (dataObj?.companies) {
                     setCompanies(dataObj.companies);
                 } else {
-                    setCompanies(mockCompanies);
+                    setCompanies([]);
                 }
             } else {
-                setCompanies(mockCompanies);
+                setCompanies([]);
             }
 
             if (statsRes.status === "fulfilled") {
@@ -50,7 +50,7 @@ export default function CompaniesPage() {
             }
         } catch (err) {
             console.error("Fetch companies error:", err);
-            setCompanies(mockCompanies);
+            setCompanies([]);
         } finally {
             setLoading(false);
         }

@@ -93,57 +93,47 @@ export default function Dashboard() {
         fetchDashboardData();
     }, []);
 
-    // Fallback monthly revenue / growth chart data if empty
-    const defaultChartData = [
-        { month: "Jan", leads: 45, revenue: 32000 },
-        { month: "Feb", leads: 68, revenue: 48000 },
-        { month: "Mar", leads: 92, revenue: 64000 },
-        { month: "Apr", leads: 110, revenue: 85000 },
-        { month: "May", leads: 145, revenue: 112000 },
-        { month: "Jun", leads: 180, revenue: 142000 },
-    ];
-
     if (loading) {
         return <LoadingScreen message="Fetching Dashboard Analytics..." />;
     }
 
-    // Default overview stats
+    // Live overview stats
     const stats = [
         {
             title: "Total Pipeline Value",
-            value: "$428,500",
-            change: "+24.8%",
+            value: overview?.totalValue ? `$${overview.totalValue.toLocaleString()}` : "$0",
+            change: "+100%",
             isPositive: true,
             icon: TrendingUp,
             color: "from-blue-600 to-indigo-600",
         },
         {
             title: "Active Leads",
-            value: overview?.leads || 148,
-            change: "+12.4%",
+            value: overview?.leads !== undefined ? overview.leads : 0,
+            change: "+100%",
             isPositive: true,
             icon: Zap,
             color: "from-indigo-600 to-purple-600",
         },
         {
             title: "Total Prospects",
-            value: overview?.prospects || 342,
-            change: "+8.2%",
+            value: overview?.prospects !== undefined ? overview.prospects : 0,
+            change: "+100%",
             isPositive: true,
             icon: Target,
             color: "from-purple-600 to-pink-600",
         },
         {
-            title: "Conversion Rate",
-            value: `${funnel?.conversionRate || 14.8}%`,
-            change: "+3.5%",
+            title: "Win Conversion Rate",
+            value: overview?.conversionRate ? `${overview.conversionRate}%` : "0%",
+            change: "+100%",
             isPositive: true,
-            icon: CheckCircle2,
-            color: "from-emerald-500 to-teal-600",
+            icon: Award,
+            color: "from-emerald-600 to-teal-600",
         },
         {
             title: "Upcoming Interviews",
-            value: overview?.interviews || interviews.length || 6,
+            value: overview?.interviews !== undefined ? overview.interviews : interviews.length,
             change: "Scheduled",
             isPositive: true,
             icon: Calendar,
@@ -151,20 +141,8 @@ export default function Dashboard() {
         },
     ];
 
-    // Mock Top Performers Leaderboard
-    const topPerformers = [
-        { name: "Guddu Kumar", role: "Sales Lead", deals: 24, revenue: "$184,000", avatar: "GK" },
-        { name: "Sarah Jenkins", role: "Account Exec", deals: 18, revenue: "$126,000", avatar: "SJ" },
-        { name: "Marcus Vance", role: "Outreach Rep", deals: 15, revenue: "$98,500", avatar: "MV" },
-    ];
-
-    // Mock Recent Activity if empty
-    const displayActivities = activities.length > 0 ? activities : [
-        { id: 1, title: "Lead Converted", desc: "Apex Solutions moved to Closed-Won ($85,000)", time: "10m ago", icon: CheckCircle2 },
-        { id: 2, title: "Interview Booked", desc: "Demo meeting scheduled with Marcus Vance", time: "45m ago", icon: Calendar },
-        { id: 3, title: "Outreach Blast Sent", desc: "Drip sequence #4 sent to 42 prospects", time: "2h ago", icon: Send },
-        { id: 4, title: "Company Profile Enriched", desc: "PropScale Realty tech stack updated", time: "4h ago", icon: Building2 },
-    ];
+    // Live Activities array only
+    const displayActivities = activities;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-300">
@@ -247,36 +225,34 @@ export default function Dashboard() {
                     </div>
 
                     <div className="h-72 w-full pt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={defaultChartData}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
-                                <YAxis stroke="#94a3b8" fontSize={12} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "#0f172a",
-                                        borderColor: "#1e293b",
-                                        borderRadius: "12px",
-                                        color: "#fff",
-                                        fontSize: "12px",
-                                    }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="revenue"
-                                    stroke="#2563eb"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorRevenue)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {monthlyData && monthlyData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={monthlyData}>
+                                    <defs>
+                                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
+                                            <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
+                                    <YAxis stroke="#94a3b8" fontSize={12} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: "#0f172a",
+                                            borderColor: "#1e293b",
+                                            borderRadius: "12px",
+                                            color: "#fff",
+                                        }}
+                                    />
+                                    <Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                                No monthly growth data recorded in database yet.
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -293,11 +269,11 @@ export default function Dashboard() {
 
                     <div className="space-y-3 pt-2">
                         {[
-                            { stage: "Total Prospects", count: funnel?.prospects || 342, pct: "100%", color: "bg-blue-600" },
-                            { stage: "Contacted", count: funnel?.contacted || 215, pct: "63%", color: "bg-indigo-600" },
-                            { stage: "Replied", count: funnel?.replied || 142, pct: "41%", color: "bg-purple-600" },
-                            { stage: "Booked Demos", count: funnel?.booked || 88, pct: "25%", color: "bg-pink-600" },
-                            { stage: "Converted Won", count: funnel?.converted || 51, pct: "15%", color: "bg-emerald-500" },
+                            { stage: "Total Prospects", count: funnel?.prospects || 0, pct: funnel?.prospects ? "100%" : "0%", color: "bg-blue-600" },
+                            { stage: "Contacted", count: funnel?.contacted || 0, pct: funnel?.prospects ? `${Math.round(((funnel?.contacted || 0) / funnel.prospects) * 100)}%` : "0%", color: "bg-indigo-600" },
+                            { stage: "Replied", count: funnel?.replied || 0, pct: funnel?.prospects ? `${Math.round(((funnel?.replied || 0) / funnel.prospects) * 100)}%` : "0%", color: "bg-purple-600" },
+                            { stage: "Booked Demos", count: funnel?.booked || 0, pct: funnel?.prospects ? `${Math.round(((funnel?.booked || 0) / funnel.prospects) * 100)}%` : "0%", color: "bg-pink-600" },
+                            { stage: "Converted Won", count: funnel?.converted || 0, pct: funnel?.prospects ? `${Math.round(((funnel?.converted || 0) / funnel.prospects) * 100)}%` : "0%", color: "bg-emerald-500" },
                         ].map((stg, i) => (
                             <div key={i} className="space-y-1">
                                 <div className="flex justify-between text-xs font-semibold">
@@ -435,11 +411,11 @@ export default function Dashboard() {
 
             </div>
 
-            {/* 4. Recent Activity Feed & Top Performers */}
+            {/* 4. Recent Activity Feed */}
             <div className="grid lg:grid-cols-12 gap-8">
                 
-                {/* Recent Activity Timeline (7 Cols) */}
-                <div className="lg:col-span-7 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                {/* Recent Activity Timeline (12 Cols) */}
+                <div className="lg:col-span-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                         <div className="flex items-center gap-2">
                             <Activity className="w-4 h-4 text-emerald-600" />
@@ -451,55 +427,28 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-3">
-                        {displayActivities.map((act, idx) => (
-                            <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                </div>
-                                <div className="flex-1 space-y-0.5">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <h5 className="font-bold text-slate-900 dark:text-white">{act.title || act.action || "CRM Event"}</h5>
-                                        <span className="text-[10px] text-slate-400">{act.time || "Just now"}</span>
+                        {displayActivities && displayActivities.length > 0 ? (
+                            displayActivities.map((act, idx) => (
+                                <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+                                    <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                                        <CheckCircle2 className="w-4 h-4" />
                                     </div>
-                                    <p className="text-xs text-slate-600 dark:text-slate-300">
-                                        {act.desc || act.description || "Activity recorded in system log"}
-                                    </p>
+                                    <div className="flex-1 space-y-0.5">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <h5 className="font-bold text-slate-900 dark:text-white">{act.title || act.action || "CRM Event"}</h5>
+                                            <span className="text-[10px] text-slate-400">{act.time || "Just now"}</span>
+                                        </div>
+                                        <p className="text-xs text-slate-600 dark:text-slate-300">
+                                            {act.desc || act.description || "Activity recorded in system log"}
+                                        </p>
+                                    </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="py-6 text-center text-xs text-slate-400">
+                                No recent activity recorded in system log.
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Top Sales Performers Leaderboard (5 Cols) */}
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-2">
-                            <Award className="w-4 h-4 text-amber-500" />
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                                Rep Performance Leaderboard
-                            </h3>
-                        </div>
-                        <span className="text-xs font-bold text-amber-500">This Month</span>
-                    </div>
-
-                    <div className="space-y-3">
-                        {topPerformers.map((rep, idx) => (
-                            <div key={idx} className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow">
-                                        {rep.avatar}
-                                    </div>
-                                    <div>
-                                        <h5 className="text-xs font-bold text-slate-900 dark:text-white">{rep.name}</h5>
-                                        <span className="text-[10px] text-slate-400">{rep.role}</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-xs font-extrabold text-slate-900 dark:text-white">{rep.revenue}</div>
-                                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{rep.deals} Deals Won</span>
-                                </div>
-                            </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 

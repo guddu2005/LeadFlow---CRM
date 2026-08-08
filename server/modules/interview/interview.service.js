@@ -1,5 +1,8 @@
 const Interview = require("../../models/Interview");
 const Lead = require("../../models/Lead");
+const Contact = require("../../models/Contact");
+const Company = require("../../models/Company");
+const User = require("../../models/User");
 const ApiError = require("../../utils/ApiError");
 const emailService = require("../email/email.service");
 const notificationService = require("../notification/notification.service");
@@ -81,39 +84,43 @@ const scheduleInterview = async (data, userId) => {
     const candidateFullName = `${lead.contact.firstName || "Contact"} ${lead.contact.lastName || ""}`.trim();
     const leadCompanyName = lead.companyName || lead.company?.companyName || "PropScale Management UK";
 
-    // 1. Send Thank You & Confirmation Email to Contact
-    if (lead.contact.email) {
-        await emailService.sendInterviewConfirmation({
-            to: lead.contact.email,
-            name: candidateFullName,
-            date: dateStr,
-            time: timeStr,
-            meetingLink: interview.meetingLink
-        });
-    }
+    // Fire-and-forget background email & notification dispatches (degraded to setImmediate for 0ms blocking)
+    setImmediate(async () => {
+        try {
+            if (lead.contact?.email) {
+                await emailService.sendInterviewConfirmation({
+                    to: lead.contact.email,
+                    name: candidateFullName,
+                    date: dateStr,
+                    time: timeStr,
+                    meetingLink: interview.meetingLink,
+                }).catch((e) => console.error("Interview confirmation email error:", e.message));
+            }
 
-    // 2. Send Notification Email to Researcher
-    if (researcherUser && researcherUser.email) {
-        await emailService.sendInterviewResearcherNotification({
-            to: researcherUser.email,
-            researcherName: `${researcherUser.firstName} ${researcherUser.lastName}`,
-            candidateName: candidateFullName,
-            companyName: leadCompanyName,
-            jobTitle: lead.contact.jobTitle || "Operations Director",
-            date: dateStr,
-            time: timeStr,
-            meetingLink: interview.meetingLink
-        });
-    }
+            if (researcherUser?.email) {
+                await emailService.sendInterviewResearcherNotification({
+                    to: researcherUser.email,
+                    researcherName: `${researcherUser.firstName} ${researcherUser.lastName}`,
+                    candidateName: candidateFullName,
+                    companyName: leadCompanyName,
+                    jobTitle: lead.contact?.jobTitle || "Operations Director",
+                    date: dateStr,
+                    time: timeStr,
+                    meetingLink: interview.meetingLink,
+                }).catch((e) => console.error("Researcher notification email error:", e.message));
+            }
 
-    // 3. Send Single Real-time Notification to Researcher
-    await notificationService.createNotification({
-        user: userId,
-        type: "INTERVIEW_CREATED",
-        title: "Research Interview Booked 🎯",
-        message: `You have successfully booked a research interview with ${candidateFullName} (${leadCompanyName}) scheduled for ${dateStr} at ${timeStr} for UK/EU Property Management Study.`,
-        referenceId: interview._id,
-        referenceModel: "Interview"
+            await notificationService.createNotification({
+                user: userId,
+                type: "INTERVIEW_CREATED",
+                title: "Research Interview Booked 🎯",
+                message: `You have successfully booked a research interview with ${candidateFullName} (${leadCompanyName}) scheduled for ${dateStr} at ${timeStr}.`,
+                referenceId: interview._id,
+                referenceModel: "Interview",
+            }).catch((e) => console.error("Notification creation error:", e.message));
+        } catch (err) {
+            console.error("Background interview dispatch error:", err.message);
+        }
     });
 
 
