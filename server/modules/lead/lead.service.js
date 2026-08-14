@@ -476,8 +476,29 @@ const convertLeadToCompany = async (leadId, userId) => {
     if (lead.contact) {
         await Contact.findByIdAndUpdate(lead.contact._id || lead.contact, {
             company: company._id,
+            assignedTo: lead.assignedTo || null,
             updatedBy: userId
         });
+    } else {
+        const rawName = (lead.companyName || "Primary Contact").trim();
+        const nameParts = rawName.split(" ");
+        const firstName = nameParts[0] || "Primary";
+        const lastName = nameParts.slice(1).join(" ") || "Contact";
+
+        const newContact = await Contact.create({
+            company: company._id,
+            firstName,
+            lastName,
+            email: lead.email || `contact_${company._id.toString().slice(-6)}@leadflow-crm.com`,
+            phone: lead.phone || "",
+            jobTitle: "Executive / Primary Contact",
+            isPrimary: true,
+            assignedTo: lead.assignedTo || null,
+            createdBy: userId,
+            updatedBy: userId
+        });
+        lead.contact = newContact._id;
+        await lead.save();
     }
 
     await notificationService.createNotification({

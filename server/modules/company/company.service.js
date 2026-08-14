@@ -15,11 +15,32 @@ const createCompany = async (companyData, userId) => {
         throw new ApiError(409, "Company already exists");
     }
 
-    return await Company.create({
+    const company = await Company.create({
         ...companyData,
         createdBy: userId,
         updatedBy: userId
     });
+
+    // Auto-create linked primary Contact so that contacts appear in the Contacts section
+    const contactName = (companyData.contactName || companyData.contactFirstName || companyData.contactPerson || companyData.companyName || "Primary Contact").trim();
+    const nameParts = contactName.split(" ");
+    const firstName = companyData.contactFirstName || nameParts[0] || "Primary";
+    const lastName = companyData.contactLastName || nameParts.slice(1).join(" ") || "Contact";
+
+    await Contact.create({
+        company: company._id,
+        firstName,
+        lastName,
+        email: companyData.email || companyData.contactEmail || `contact_${company._id.toString().slice(-6)}@leadflow-crm.com`,
+        phone: companyData.phone || companyData.contactPhone || "",
+        jobTitle: companyData.jobTitle || companyData.contactJobTitle || "Executive / Primary Contact",
+        isPrimary: true,
+        assignedTo: companyData.assignedTo || null,
+        createdBy: userId,
+        updatedBy: userId
+    });
+
+    return company;
 };
 
 const getCompanies = async (query) => {
